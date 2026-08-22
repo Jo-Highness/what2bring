@@ -20,6 +20,9 @@ auf öffentlichen Seiten).
   Name + E-Mail Pflicht; erneutes Absenden mit gleicher E-Mail aktualisiert den eigenen
   Eintrag; optional Mitbring-Ansicht (nur Namen), je nach Admin-Sichtbarkeit.
 - **Sichtbarkeit je Abfrage:** `who_and_what` | `names_only` | `none` — **E-Mail nie**.
+- **Rechtliches:** Impressum + Datenschutzerklärung werden über die Admin-Seite
+  „Rechtliches" gepflegt (in der DB, nicht im Code), mit Vorlagen zum Ausfüllen;
+  öffentlich unter `?r=impressum` / `?r=datenschutz`, von jeder Seite im Footer verlinkt.
 
 ## Konfiguration (`config.php`, nicht eingecheckt)
 `config.php.example` nach `config.php` kopieren (eine Ebene **über** dem Docroot
