@@ -1,0 +1,14 @@
+Hallo {name},
+
+vielen Dank, dass du beim Fest mithilfst! Kurze Erinnerung zu „{ueberschrift}".
+
+Du hattest zugesagt, mitzubringen:
+{was_ich_mitbringe}
+
+Benötigt wird alles am {datum}.
+
+Falls sich etwas geändert hat, kannst du deine Angabe jederzeit über deinen persönlichen Link anpassen.
+
+Herzlichen Dank und bis bald!
+
+Euer Orga-Team

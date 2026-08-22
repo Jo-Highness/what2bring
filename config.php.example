@@ -1,0 +1,40 @@
+<?php
+// Copy this file to ../config.php (one level ABOVE the public/ document root)
+// and fill in real values. config.php must NOT be committed and must NOT be
+// served over HTTP.
+//
+// Generate the admin password hash on any PHP CLI:
+//   php -r "echo password_hash('YOUR-PASSWORD', PASSWORD_DEFAULT), PHP_EOL;"
+// Generate the app pepper:
+//   php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"
+
+return [
+    // Admin login
+    'admin_password_hash' => '$2y$10$replace_me_with_a_real_password_hash____________________',
+
+    // Secret HMAC key used to derive email_hash (dedup) — keep stable & private.
+    'app_pepper' => 'replace_me_with_64_hex_chars_from_random_bytes_32',
+
+    // Public base URL WITHOUT trailing slash, used to build shareable links.
+    'base_url' => 'https://fragmichnicht.de',
+
+    // Absolute path to the SQLite database file (kept outside the document root).
+    'db_file' => __DIR__ . '/data/what2bring.sqlite',
+
+    // Optional: skip real SMTP and write outgoing mails to data/mail.log instead.
+    // Set to true for a dry-run, false to actually send.
+    'mail_dry_run' => false,
+
+    // SMTP for the reminder e-mails (individual send, one recipient per message).
+    'smtp' => [
+        'host'       => 'smtp.example.com',
+        'port'       => 587,
+        'secure'     => 'starttls',      // 'starttls' (587) or 'ssl' (465) or '' (none)
+        'user'       => 'user@example.com',
+        'pass'       => '',
+        'from_email' => 'feste@fragmichnicht.de',
+        'from_name'  => 'Vereinsfeste',
+        'timeout'    => 15,
+        'verify_tls' => true,            // verify the SMTP server certificate
+    ],
+];

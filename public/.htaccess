@@ -1,0 +1,15 @@
+# fragmichnicht — document root (public/)
+DirectoryIndex index.php
+
+# Security headers (mirrors the ones PHP sets, in case PHP header() is bypassed)
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+
+# Never serve dotfiles (e.g. .htaccess, .git leftovers)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

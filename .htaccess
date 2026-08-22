@@ -1,0 +1,16 @@
+# Strato fallback: only relevant if the hosting document root is the PROJECT root
+# (i.e. you could NOT point the domain at public/). It blocks HTTP access to
+# everything that must stay private. When the document root is public/ (preferred),
+# this file sits ABOVE the docroot and simply does no harm.
+<IfModule mod_headers.c>
+    Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+
+# Deny the sensitive top-level paths outright.
+RedirectMatch 404 ^/(inc|data|templates)(/|$)
+<FilesMatch "(config\.php|config\.php\.example|schema\.sql|composer\.(json|lock)|\.gitignore)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
