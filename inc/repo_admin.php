@@ -32,15 +32,15 @@ function admin_get_items(int $pollId): array
 }
 
 /** @param string[] $labels  create a poll with its items; returns ['id','token']. */
-function admin_create_poll(string $title, ?string $description, ?string $eventDate, string $visibility, array $labels): array
+function admin_create_poll(string $title, ?string $description, ?string $eventDate, string $visibility, int $emailRequired, array $labels): array
 {
     $db = db();
     $token = admin_unique_token($db);
     $db->beginTransaction();
     try {
-        $st = $db->prepare('INSERT INTO polls (token, title, description, event_date, visibility)
-                            VALUES (?, ?, ?, ?, ?)');
-        $st->execute([$token, $title, $description ?: null, $eventDate ?: null, $visibility]);
+        $st = $db->prepare('INSERT INTO polls (token, title, description, event_date, visibility, email_required)
+                            VALUES (?, ?, ?, ?, ?, ?)');
+        $st->execute([$token, $title, $description ?: null, $eventDate ?: null, $visibility, $emailRequired ? 1 : 0]);
         $pollId = (int) $db->lastInsertId();
         admin_save_items($db, $pollId, array_map(fn($l) => ['id' => null, 'label' => $l], $labels));
         $db->commit();
@@ -52,15 +52,15 @@ function admin_create_poll(string $title, ?string $description, ?string $eventDa
 }
 
 /** @param array $items list of ['id'=>int|null,'label'=>string] */
-function admin_update_poll(int $id, string $title, ?string $description, ?string $eventDate, string $visibility, array $items): void
+function admin_update_poll(int $id, string $title, ?string $description, ?string $eventDate, string $visibility, int $emailRequired, array $items): void
 {
     $db = db();
     $db->beginTransaction();
     try {
         $st = $db->prepare('UPDATE polls
-                            SET title = ?, description = ?, event_date = ?, visibility = ?, updated_at = datetime(\'now\')
+                            SET title = ?, description = ?, event_date = ?, visibility = ?, email_required = ?, updated_at = datetime(\'now\')
                             WHERE id = ?');
-        $st->execute([$title, $description ?: null, $eventDate ?: null, $visibility, $id]);
+        $st->execute([$title, $description ?: null, $eventDate ?: null, $visibility, $emailRequired ? 1 : 0, $id]);
         admin_save_items($db, $id, $items);
         $db->commit();
     } catch (Throwable $e) {
@@ -134,10 +134,11 @@ function admin_unique_token(PDO $db): string
  */
 function admin_contributions(int $pollId): array
 {
+    // LEFT JOIN: entries without an e-mail (optional-email polls) still show up.
     $st = db()->prepare(
         'SELECT c.id, c.name, cc.email, c.created_at, c.updated_at
          FROM contributions c
-         JOIN contribution_contacts cc ON cc.contribution_id = c.id
+         LEFT JOIN contribution_contacts cc ON cc.contribution_id = c.id
          WHERE c.poll_id = ?
          ORDER BY c.name COLLATE NOCASE'
     );
@@ -167,6 +168,9 @@ function admin_reminder_recipients(int $pollId): array
     $rows = admin_contributions($pollId);
     $out = [];
     foreach ($rows as $r) {
+        if (empty($r['email'])) {
+            continue; // no address on file -> cannot be reminded
+        }
         $parts = [];
         foreach ($r['items'] as $it) {
             $label = $it['label'];

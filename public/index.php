@@ -100,6 +100,7 @@ switch ($r) {
             post('description'),
             post('event_date'),
             valid_visibility(post('visibility', 'names_only')),
+            (int) ($_POST['email_required'] ?? 1) ? 1 : 0,
             $labels
         );
         clear_old();
@@ -156,6 +157,7 @@ switch ($r) {
             post('description'),
             post('event_date'),
             valid_visibility(post('visibility', 'names_only')),
+            (int) ($_POST['email_required'] ?? 1) ? 1 : 0,
             parse_items_from_post()
         );
         flash('Änderungen gespeichert.', 'success');
@@ -276,8 +278,12 @@ switch ($r) {
         if ($name === '') {
             $problems[] = 'Bitte den Namen angeben.';
         }
-        if (!is_valid_email($email)) {
-            $problems[] = 'Bitte eine gültige E-Mail-Adresse angeben.';
+        if ((int) ($poll['email_required'] ?? 1) === 1) {
+            if (!is_valid_email($email)) {
+                $problems[] = 'Bitte eine gültige E-Mail-Adresse angeben.';
+            }
+        } elseif ($email !== '' && !is_valid_email($email)) {
+            $problems[] = 'Die E-Mail-Adresse ist ungültig.';
         }
         if (!$selections) {
             $problems[] = 'Bitte mindestens ein Ding auswählen, das du mitbringst.';

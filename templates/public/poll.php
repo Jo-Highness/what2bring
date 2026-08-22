@@ -43,10 +43,13 @@ $token = $poll['token'];
             <label for="name">Name *</label>
             <input type="text" id="name" name="name" value="<?= e((string) old('name')) ?>" autocomplete="name" required>
         </div>
+        <?php $emailReq = (int) ($poll['email_required'] ?? 1); ?>
         <div class="field">
-            <label for="email">E-Mail *</label>
-            <input type="email" id="email" name="email" value="<?= e((string) old('email')) ?>" autocomplete="email" required>
-            <p class="hint">Nur für die Orga (z. B. Erinnerungen) — sie wird niemandem sonst angezeigt.</p>
+            <label for="email">E-Mail <?= $emailReq ? '*' : '<span class="muted" style="font-weight:400;">(optional)</span>' ?></label>
+            <input type="email" id="email" name="email" value="<?= e((string) old('email')) ?>" autocomplete="email" <?= $emailReq ? 'required' : '' ?>>
+            <p class="hint"><?= $emailReq
+                ? 'Nur für die Orga (z. B. Erinnerungen) — sie wird niemandem sonst angezeigt.'
+                : 'Optional. Nur für die Orga (z. B. Erinnerungen), niemandem sonst sichtbar. Ohne E-Mail bekommst du keine Erinnerung.' ?></p>
         </div>
         <div class="btn-row">
             <button type="submit" class="btn btn--lg">Eintragen</button>

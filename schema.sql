@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS polls (
   event_date  TEXT,                          -- ISO-8601 date (YYYY-MM-DD)
   visibility  TEXT NOT NULL DEFAULT 'names_only'
               CHECK (visibility IN ('who_and_what','names_only','none')),
+  email_required INTEGER NOT NULL DEFAULT 1,   -- 1 = E-Mail Pflicht, 0 = optional
   created_at  TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at  TEXT
 );

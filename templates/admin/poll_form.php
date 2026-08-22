@@ -6,6 +6,7 @@ $vTitle = $isEdit ? $poll['title'] : old('title');
 $vDesc  = $isEdit ? (string) $poll['description'] : old('description');
 $vDate  = $isEdit ? (string) $poll['event_date'] : old('event_date');
 $vVis   = $isEdit ? $poll['visibility'] : (old('visibility') ?: 'who_and_what');
+$vEmailReq = $isEdit ? (int) $poll['email_required'] : (int) old('email_required', '1');
 // rows to prefill
 $rows = [];
 if ($isEdit) {
@@ -53,6 +54,14 @@ $visOptions = [
             <label for="event_date">Benötigt am</label>
             <input type="date" id="event_date" name="event_date" value="<?= e($vDate) ?>">
             <p class="hint">Wann werden die Sachen gebraucht? (optional)</p>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+            <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-weight:500;">
+                <input type="hidden" name="email_required" value="0">
+                <input type="checkbox" name="email_required" value="1" <?= $vEmailReq ? 'checked' : '' ?> style="margin-top:3px;accent-color:var(--accent);width:20px;height:20px;flex:0 0 auto;">
+                <span><strong>E-Mail-Adresse ist Pflicht</strong><br>
+                    <span class="muted" style="font-size:.9rem;">Wenn deaktiviert, können Teilnehmende auch ohne E-Mail mitmachen — sie erhalten dann aber keine Erinnerung.</span></span>
+            </label>
         </div>
     </div>
 

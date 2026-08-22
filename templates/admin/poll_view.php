@@ -10,6 +10,7 @@ $visLabel = ['who_and_what' => 'Wer &amp; was sichtbar', 'names_only' => 'Nur Na
         <div class="poll-item__meta">
             <?php if ($poll['event_date']): ?><span>📅 <?= e(fmt_date($poll['event_date'])) ?></span><?php endif; ?>
             <span class="chip <?= $poll['visibility'] !== 'none' ? 'chip--on' : '' ?>">👁 <?= $visLabel ?></span>
+            <span class="chip">✉ <?= (int) $poll['email_required'] ? 'E-Mail Pflicht' : 'E-Mail optional' ?></span>
         </div>
     </div>
     <div class="btn-row">
@@ -61,7 +62,7 @@ $visLabel = ['who_and_what' => 'Wer &amp; was sichtbar', 'names_only' => 'Nur Na
                     <?php foreach ($contributions as $c): ?>
                         <tr>
                             <td><?= e($c['name']) ?></td>
-                            <td><a href="mailto:<?= e($c['email']) ?>"><?= e($c['email']) ?></a></td>
+                            <td><?php if (!empty($c['email'])): ?><a href="mailto:<?= e($c['email']) ?>"><?= e($c['email']) ?></a><?php else: ?><span class="muted">— (ohne E-Mail)</span><?php endif; ?></td>
                             <td>
                                 <?php foreach ($c['items'] as $it): ?>
                                     <div><strong><?= e($it['label']) ?></strong><?php if (trim((string) $it['detail']) !== ''): ?> — <?= e($it['detail']) ?><?php endif; ?></div>

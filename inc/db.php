@@ -32,6 +32,13 @@ function db(): PDO
     if ($schema !== false && $schema !== '') {
         $pdo->exec($schema);
     }
+
+    // Lightweight column migrations for DBs created by an earlier version.
+    $pollCols = array_column($pdo->query('PRAGMA table_info(polls)')->fetchAll(), 'name');
+    if (!in_array('email_required', $pollCols, true)) {
+        $pdo->exec('ALTER TABLE polls ADD COLUMN email_required INTEGER NOT NULL DEFAULT 1');
+    }
+
     if ($fresh) {
         @chmod($file, 0660);
     }

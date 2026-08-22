@@ -11,7 +11,7 @@ function public_get_poll_by_token(string $token): ?array
     if ($token === '') {
         return null;
     }
-    $st = db()->prepare('SELECT id, token, title, description, event_date, visibility FROM polls WHERE token = ?');
+    $st = db()->prepare('SELECT id, token, title, description, event_date, visibility, email_required FROM polls WHERE token = ?');
     $st->execute([$token]);
     $row = $st->fetch();
     return $row ?: null;
@@ -64,26 +64,36 @@ function public_submit(int $pollId, string $name, string $email, array $selectio
     $db = db();
     $name = trim($name);
     $email = trim($email);
-    $emailHash = email_hash($email);
+    $hasEmail = $email !== '';
 
     $db->beginTransaction();
     try {
-        $find = $db->prepare('SELECT id FROM contributions WHERE poll_id = ? AND email_hash = ?');
-        $find->execute([$pollId, $emailHash]);
-        $cid = $find->fetchColumn();
+        if ($hasEmail) {
+            // Dedup/upsert per (poll, e-mail); e-mail plaintext only in contribution_contacts.
+            $emailHash = email_hash($email);
+            $find = $db->prepare('SELECT id FROM contributions WHERE poll_id = ? AND email_hash = ?');
+            $find->execute([$pollId, $emailHash]);
+            $cid = $find->fetchColumn();
 
-        if ($cid === false) {
-            $ins = $db->prepare('INSERT INTO contributions (poll_id, name, email_hash) VALUES (?, ?, ?)');
-            $ins->execute([$pollId, $name, $emailHash]);
-            $cid = (int) $db->lastInsertId();
-            $db->prepare('INSERT INTO contribution_contacts (contribution_id, email) VALUES (?, ?)')
-               ->execute([$cid, $email]);
+            if ($cid === false) {
+                $db->prepare('INSERT INTO contributions (poll_id, name, email_hash) VALUES (?, ?, ?)')
+                   ->execute([$pollId, $name, $emailHash]);
+                $cid = (int) $db->lastInsertId();
+                $db->prepare('INSERT INTO contribution_contacts (contribution_id, email) VALUES (?, ?)')
+                   ->execute([$cid, $email]);
+            } else {
+                $cid = (int) $cid;
+                $db->prepare('UPDATE contributions SET name = ?, updated_at = datetime(\'now\') WHERE id = ?')
+                   ->execute([$name, $cid]);
+                $db->prepare('UPDATE contribution_contacts SET email = ? WHERE contribution_id = ?')
+                   ->execute([$email, $cid]);
+            }
         } else {
-            $cid = (int) $cid;
-            $db->prepare('UPDATE contributions SET name = ?, updated_at = datetime(\'now\') WHERE id = ?')
-               ->execute([$name, $cid]);
-            $db->prepare('UPDATE contribution_contacts SET email = ? WHERE contribution_id = ?')
-               ->execute([$email, $cid]);
+            // No e-mail (optional-email poll): each submission is a distinct entry.
+            // A random email_hash satisfies UNIQUE(poll_id, email_hash); no contact row.
+            $db->prepare('INSERT INTO contributions (poll_id, name, email_hash) VALUES (?, ?, ?)')
+               ->execute([$pollId, $name, token_new(16)]);
+            $cid = (int) $db->lastInsertId();
         }
 
         // Replace the selection wholesale.
