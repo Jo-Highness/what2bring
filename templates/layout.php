@@ -37,8 +37,9 @@
 </main>
 
 <footer class="footer">
-    <div class="wrap">
+    <div class="wrap footer__inner">
         <p>Wer bringt was mit? · <span class="muted">Vereinsfeste ganz einfach organisieren</span></p>
+        <p class="footer__links"><a href="<?= e(url('impressum')) ?>">Impressum</a></p>
     </div>
 </footer>
 </body>

@@ -167,6 +167,10 @@ table.data th, table.data td { text-align: left; padding: 10px 12px; border-bott
 table.data th { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
 
 .footer { border-top: 1px solid var(--border); background: var(--surface); padding-block: 18px; color: var(--muted); font-size: .9rem; }
+.footer__inner { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.footer__inner p { margin: 0; }
+.footer__links a { color: var(--muted); text-decoration: none; font-weight: 600; }
+.footer__links a:hover { color: var(--text); }
 .center { text-align: center; }
 .big-emoji { font-size: 3rem; line-height: 1; }
 .spacer-s { height: 8px; }

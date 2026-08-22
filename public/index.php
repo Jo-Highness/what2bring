@@ -311,6 +311,11 @@ switch ($r) {
         ], 'Danke', true);
         break;
 
+    /* ---- public: Impressum (frei erreichbar, kein Login/Token) ---- */
+    case 'impressum':
+        view('public/impressum', [], 'Impressum', true);
+        break;
+
     default:
         http_response_code(404);
         view('public/notfound', [], 'Nicht gefunden', true);
