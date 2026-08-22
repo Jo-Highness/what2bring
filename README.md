@@ -8,7 +8,7 @@ abhängigkeitsfreier SMTP-Client. **E-Mail-Adressen bleiben strikt intern** (nie
 auf öffentlichen Seiten).
 
 > Kein MCP-Server, kein Reverse-Proxy nötig. Klassische PHP-App für Shared-Hosting.
-> Hosting-Domain: **fragmichnicht.de**. Repo: gitea `jarvis/what2bring`, Branch `feat/app`.
+> Hosting-Domain: **fragmichnicht.de**. Repo: gitea `jarvis/what2bring` (Branch `main`).
 > QA: PASS 21/21 (Suite `ebc330e4`). Clean-Room-Anforderungen: infrastructure-docs, requirements-Doc `1dc5fb32`.
 
 ## Funktionen
