@@ -123,6 +123,41 @@ switch ($r) {
         ], $poll['title']);
         break;
 
+    /* ---- admin: CSV-Export der Eintraege ---- */
+    case 'admin.poll_export':
+        require_admin();
+        $poll = admin_get_poll((int) ($_GET['id'] ?? 0));
+        if (!$poll) {
+            http_response_code(404);
+            redirect_route('admin');
+        }
+        $rows = admin_contributions((int) $poll['id']);
+        $slug = preg_replace('/[^A-Za-z0-9]+/', '-', (string) $poll['title']);
+        $slug = trim((string) $slug, '-') ?: ('abfrage-' . $poll['id']);
+        $filename = 'what2bring_' . $slug . '_' . date('Y-m-d') . '.csv';
+
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: no-store');
+        $out = fopen('php://output', 'w');
+        fwrite($out, "\xEF\xBB\xBF"); // UTF-8 BOM so Excel shows umlauts correctly
+        fputcsv($out, ['Name', 'E-Mail', 'Bringt mit', 'Aktualisiert'], ';');
+        foreach ($rows as $c) {
+            $parts = [];
+            foreach ($c['items'] as $it) {
+                $d = trim((string) ($it['detail'] ?? ''));
+                $parts[] = $d !== '' ? $it['label'] . ' (' . $d . ')' : $it['label'];
+            }
+            fputcsv($out, [
+                (string) $c['name'],
+                (string) ($c['email'] ?? ''),
+                implode('; ', $parts),
+                (string) ($c['updated_at'] ?: $c['created_at']),
+            ], ';');
+        }
+        fclose($out);
+        exit;
+
     /* ---- admin: edit ---- */
     case 'admin.poll_edit':
         require_admin();

@@ -49,7 +49,12 @@ $visLabel = ['who_and_what' => 'Wer &amp; was sichtbar', 'names_only' => 'Nur Na
 </div>
 
 <div class="card">
-    <h2>Wer bringt was mit? (<?= count($contributions) ?>)</h2>
+    <div class="head-row" style="margin-bottom:12px;">
+        <h2 style="margin:0;">Wer bringt was mit? (<?= count($contributions) ?>)</h2>
+        <?php if ($contributions): ?>
+            <a class="btn btn--ghost" href="<?= e(url('admin.poll_export', ['id' => $poll['id']])) ?>">⬇ CSV-Export</a>
+        <?php endif; ?>
+    </div>
     <?php if (!$contributions): ?>
         <p class="muted">Noch keine Rückmeldungen.</p>
     <?php else: ?>
