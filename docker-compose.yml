@@ -1,0 +1,21 @@
+services:
+  web:
+    build: .
+    image: fragmichnicht:local
+    container_name: fragmichnicht
+    restart: unless-stopped
+    ports:
+      # host:container — test site on docker02, plain HTTP (not behind the mTLS proxy)
+      - "8470:80"
+    volumes:
+      # persist the SQLite DB + mail.log on the host
+      - ./data:/var/www/html/data
+      # runtime config with real admin hash + SMTP (kept out of git)
+      - ./config.php:/var/www/html/config.php:ro
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/index.php?r=admin.login')!==false?0:1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

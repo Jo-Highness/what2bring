@@ -1,0 +1,6 @@
+.git
+.gitignore
+data/*.sqlite
+data/*.sqlite-*
+data/mail.log
+*.log
