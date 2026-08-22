@@ -311,10 +311,33 @@ switch ($r) {
         ], 'Danke', true);
         break;
 
-    /* ---- public: Impressum (frei erreichbar, kein Login/Token) ---- */
+    /* ---- public: Impressum / Datenschutz (frei erreichbar, kein Login/Token) ---- */
     case 'impressum':
-        view('public/impressum', [], 'Impressum', true);
+        view('public/legal', ['heading' => 'Impressum', 'text' => get_setting('impressum')], 'Impressum', true);
         break;
+
+    case 'datenschutz':
+        view('public/legal', ['heading' => 'Datenschutzerklärung', 'text' => get_setting('datenschutz')], 'Datenschutz', true);
+        break;
+
+    /* ---- admin: Rechtliches (Impressum + Datenschutz pflegen) ---- */
+    case 'admin.legal':
+        require_admin();
+        $imp = get_setting('impressum');
+        $dat = get_setting('datenschutz');
+        view('admin/legal', [
+            'impressum'   => $imp !== '' ? $imp : legal_default('impressum'),
+            'datenschutz' => $dat !== '' ? $dat : legal_default('datenschutz'),
+        ], 'Rechtliches');
+        break;
+
+    case 'admin.legal_save':
+        require_admin();
+        csrf_check();
+        set_setting('impressum', trim((string) ($_POST['impressum'] ?? '')));
+        set_setting('datenschutz', trim((string) ($_POST['datenschutz'] ?? '')));
+        flash('Rechtliche Texte gespeichert.', 'success');
+        redirect_route('admin.legal');
 
     default:
         http_response_code(404);

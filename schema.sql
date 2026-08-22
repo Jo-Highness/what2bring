@@ -49,3 +49,9 @@ CREATE TABLE IF NOT EXISTS contribution_items (
 );
 CREATE INDEX IF NOT EXISTS idx_ci_item ON contribution_items(item_id);
 CREATE INDEX IF NOT EXISTS idx_ci_contrib ON contribution_items(contribution_id);
+
+-- Free-form site settings (e.g. legal texts: impressum, datenschutz)
+CREATE TABLE IF NOT EXISTS settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL DEFAULT ''
+);

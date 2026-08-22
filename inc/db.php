@@ -25,11 +25,14 @@ function db(): PDO
     $pdo->exec('PRAGMA journal_mode = WAL');
     $pdo->exec('PRAGMA busy_timeout = 5000');
 
+    // Schema is fully idempotent (CREATE ... IF NOT EXISTS), so run it on every
+    // connect: initialises a fresh DB and auto-migrates an existing one (e.g. new
+    // tables added in later versions).
+    $schema = @file_get_contents(dirname(__DIR__) . '/schema.sql');
+    if ($schema !== false && $schema !== '') {
+        $pdo->exec($schema);
+    }
     if ($fresh) {
-        $schema = @file_get_contents(dirname(__DIR__) . '/schema.sql');
-        if ($schema !== false && $schema !== '') {
-            $pdo->exec($schema);
-        }
         @chmod($file, 0660);
     }
 

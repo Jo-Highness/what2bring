@@ -1,0 +1,58 @@
+Datenschutzerklärung
+
+1. Verantwortlicher
+Verantwortlich für die Datenverarbeitung auf dieser Website ist:
+[Vor- und Nachname]
+[Straße und Hausnummer]
+[PLZ Ort]
+E-Mail: [E-Mail-Adresse]
+
+2. Zweck der Anwendung
+Diese Website dient dazu, für Vereinsfeste und ähnliche Veranstaltungen zu
+organisieren, wer welche Dinge (z. B. Kuchen, Salat) mitbringt. Teilnehmende
+tragen sich über einen persönlichen Link ein.
+
+3. Welche Daten wir verarbeiten
+Wenn du dich zu einer Abfrage einträgst, verarbeiten wir:
+- deinen Namen,
+- deine E-Mail-Adresse,
+- deine Angabe, welche Dinge du mitbringst (inkl. optionaler Details),
+- Zeitpunkt der Eintragung/Änderung.
+Deine E-Mail-Adresse wird ausschließlich intern für die Organisation
+(z. B. Erinnerungen) verwendet und anderen Teilnehmenden nicht angezeigt.
+
+4. Zweck und Rechtsgrundlage der Verarbeitung
+Die Verarbeitung erfolgt zur Organisation der jeweiligen Veranstaltung und zum
+Versand von Erinnerungen. Rechtsgrundlage ist deine Einwilligung durch die
+freiwillige Eintragung (Art. 6 Abs. 1 lit. a DSGVO) sowie das berechtigte
+Interesse an einer reibungslosen Organisation (Art. 6 Abs. 1 lit. f DSGVO).
+
+5. Empfänger / Weitergabe
+Eine Weitergabe deiner Daten an Dritte zu eigenen Zwecken erfolgt nicht.
+Die Website wird bei unserem Hosting-Anbieter [Hosting-Anbieter, z. B. Strato AG]
+betrieben, der die Daten in unserem Auftrag verarbeitet (Auftragsverarbeitung
+gemäß Art. 28 DSGVO). Für den Versand von E-Mails wird ein E-Mail-/SMTP-Dienst
+genutzt.
+
+6. Speicherdauer
+Wir speichern deine Daten nur so lange, wie es für die jeweilige Veranstaltung
+erforderlich ist, und löschen sie anschließend bzw. auf dein Verlangen hin.
+
+7. Deine Rechte
+Du hast das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung
+(Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit
+(Art. 20) und Widerspruch (Art. 21 DSGVO). Eine erteilte Einwilligung kannst du
+jederzeit mit Wirkung für die Zukunft widerrufen. Wende dich dafür an den oben
+genannten Verantwortlichen. Außerdem hast du das Recht, dich bei einer
+Datenschutz-Aufsichtsbehörde zu beschweren.
+
+8. Cookies
+Im öffentlichen Teilnahme-Bereich werden keine Cookies zu Tracking-Zwecken
+gesetzt. Im Verwaltungsbereich wird ein technisch notwendiges Sitzungs-Cookie
+verwendet, um die Anmeldung aufrechtzuerhalten.
+
+9. Keine automatisierte Entscheidungsfindung
+Eine automatisierte Entscheidungsfindung einschließlich Profiling findet nicht
+statt.
+
+Stand: [Datum]

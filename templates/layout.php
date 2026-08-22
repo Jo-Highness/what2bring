@@ -19,6 +19,7 @@
         <?php if (!($public ?? false) && is_admin()): ?>
             <nav class="topnav">
                 <a href="<?= e(url('admin')) ?>">Übersicht</a>
+                <a href="<?= e(url('admin.legal')) ?>">Rechtliches</a>
                 <a class="btn btn--ghost" href="<?= e(url('admin.poll_new')) ?>">＋ Neue Abfrage</a>
                 <form method="post" action="<?= e(url('admin.logout')) ?>" class="inline">
                     <?= csrf_field() ?>
@@ -39,7 +40,7 @@
 <footer class="footer">
     <div class="wrap footer__inner">
         <p>Wer bringt was mit? · <span class="muted">Vereinsfeste ganz einfach organisieren</span></p>
-        <p class="footer__links"><a href="<?= e(url('impressum')) ?>">Impressum</a></p>
+        <p class="footer__links"><a href="<?= e(url('impressum')) ?>">Impressum</a> · <a href="<?= e(url('datenschutz')) ?>">Datenschutz</a></p>
     </div>
 </footer>
 </body>

@@ -171,6 +171,8 @@ table.data th { color: var(--muted); font-size: .8rem; text-transform: uppercase
 .footer__inner p { margin: 0; }
 .footer__links a { color: var(--muted); text-decoration: none; font-weight: 600; }
 .footer__links a:hover { color: var(--text); }
+.legal-text { line-height: 1.65; max-width: 68ch; }
+.legal-text a { word-break: break-word; }
 .center { text-align: center; }
 .big-emoji { font-size: 3rem; line-height: 1; }
 .spacer-s { height: 8px; }
