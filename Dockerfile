@@ -8,8 +8,8 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
  && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
  && printf '<Directory /var/www/html/public>\n  AllowOverride All\n  Require all granted\n</Directory>\n' \
-      > /etc/apache2/conf-available/z-fragmichnicht.conf \
- && a2enconf z-fragmichnicht
+      > /etc/apache2/conf-available/z-what2bring.conf \
+ && a2enconf z-what2bring
 
 # App code (config.php + data/ are provided via bind mounts at runtime).
 COPY . /var/www/html

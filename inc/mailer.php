@@ -120,7 +120,7 @@ function smtp_deliver(array $smtp, string $from, string $to, string $message): b
             throw new SmtpException("Unerwartete Begrüßung ($code)");
         }
 
-        $ehlo = 'fragmichnicht.local';
+        $ehlo = 'what2bring.local';
         [$code, $resp] = $cmd("EHLO $ehlo");
         if ($code !== 250) {
             throw new SmtpException("EHLO abgelehnt ($code): $resp");

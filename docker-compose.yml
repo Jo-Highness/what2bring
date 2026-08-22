@@ -1,8 +1,8 @@
 services:
   web:
     build: .
-    image: fragmichnicht:local
-    container_name: fragmichnicht
+    image: what2bring:local
+    container_name: what2bring
     restart: unless-stopped
     ports:
       # host:container — test site on docker02, plain HTTP (not behind the mTLS proxy)

@@ -19,7 +19,7 @@ return [
     'base_url' => 'https://fragmichnicht.de',
 
     // Absolute path to the SQLite database file (kept outside the document root).
-    'db_file' => __DIR__ . '/data/fragmichnicht.sqlite',
+    'db_file' => __DIR__ . '/data/what2bring.sqlite',
 
     // Optional: skip real SMTP and write outgoing mails to data/mail.log instead.
     // Set to true for a dry-run, false to actually send.

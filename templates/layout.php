@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title><?= e($title) ?> · fragmichnicht</title>
+    <title><?= e($title) ?> · What2Bring</title>
     <link rel="icon" href="data:image/svg+xml,<?= rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🧺</text></svg>') ?>">
     <link rel="stylesheet" href="<?= e(base_url()) ?>/assets/style.css">
 </head>
@@ -14,7 +14,7 @@
     <div class="wrap topbar__inner">
         <a class="brand" href="<?= e(($public ?? false) ? '#' : url('admin')) ?>">
             <span class="brand__mark" aria-hidden="true">🧺</span>
-            <span class="brand__name">fragmichnicht</span>
+            <span class="brand__name">What2Bring</span>
         </a>
         <?php if (!($public ?? false) && is_admin()): ?>
             <nav class="topnav">
