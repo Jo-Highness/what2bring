@@ -1,7 +1,7 @@
 # What2Bring — Handbuch
 
 **What2Bring** ist eine kleine, selbst gehostete Web-App für die klassische Vereinsfest-Frage: **„Wer bringt was mit?"**
-Eine Organisatorin oder ein Organisator (Admin) legt eine *Abfrage* an, in der die benötigten Dinge stehen — Kuchen, Salat, Obst, Getränke —
+Eine Organisatorin oder ein Organisator (Admin) legt eine *Abfrage* an, in der die benötigten Sachen stehen — Kuchen, Salat, Obst, Getränke —
 und teilt einen einzigen **geheimen Link**. Die Teilnehmenden öffnen diesen Link, haken ab, was sie mitbringen, ergänzen ein, zwei Details
 und tragen ihren Namen ein (E-Mail je Abfrage optional). Keine Konten, keine App, läuft auf günstigem Shared-Hosting.
 
@@ -71,7 +71,7 @@ Rufe `…/index.php?r=admin.login` auf und gib dein Admin-Passwort ein.
 ![Anmeldung](img/de/02-login.png)
 
 ## 4. Die Übersicht
-Nach der Anmeldung landest du in der **Übersicht** — der Liste aller deiner Abfragen mit Datum, Anzahl der Dinge, Anzahl der
+Nach der Anmeldung landest du in der **Übersicht** — der Liste aller deiner Abfragen mit Datum, Anzahl der Sachen, Anzahl der
 Teilnehmenden und einem Sichtbarkeits-Abzeichen. Über **＋ Neue Abfrage** legst du eine an.
 
 ![Übersicht](img/de/03-dashboard.png)
@@ -81,10 +81,10 @@ Teilnehmenden und einem Sichtbarkeits-Abzeichen. Über **＋ Neue Abfrage** legs
 
 - **Überschrift** — der Titel, den die Teilnehmenden sehen (z. B. *„Sommerfest im Sportverein"*).
 - **Beschreibung** — ein paar freundliche Sätze (optional).
-- **Benötigt am** — das Datum, an dem die Dinge gebraucht werden (optional).
+- **Benötigt am** — das Datum, an dem die Sachen gebraucht werden (optional).
 - **E-Mail-Adresse ist erforderlich** — ein Schalter je Abfrage. Ist er **aus**, können Leute *ohne* E-Mail-Adresse
   mitmachen (sie erhalten dann einfach keine Erinnerungen).
-- **Benötigte Dinge** — füge so viele hinzu, wie du möchtest (Kuchen, Salat, Obst …). Die Teilnehmenden wählen daraus aus.
+- **Benötigte Sachen** — füge so viele hinzu, wie du möchtest (Kuchen, Salat, Obst …). Die Teilnehmenden wählen daraus aus.
 - **Sichtbarkeit für Teilnehmende** — was Leute über die Einträge *anderer* sehen. E-Mail-Adressen werden **nie** gezeigt:
   - **Wer & was anzeigen** — Namen + was sie mitbringen (mit Details).
   - **Nur Namen anzeigen** — nur, wer mitmacht.
@@ -96,7 +96,7 @@ Teilnehmenden und einem Sichtbarkeits-Abzeichen. Über **＋ Neue Abfrage** legs
 - **Teilnahme-Link** — die geheime URL zum Verschicken. Sie enthält einen zufälligen Schlüssel; nur wer den Link hat, erreicht die
   Abfrage (Suchmaschinen werden per `noindex` ausgesperrt). **Kopiere** ihn oder **öffne** ihn in einem neuen Tab.
 - **Neuen Link erzeugen** — wechselt den Schlüssel. Der **alte Link funktioniert sofort nicht mehr** (praktisch, falls ein Link durchgesickert ist).
-- **Benötigte Dinge** — ein schneller Überblick über die festgelegten Dinge.
+- **Benötigte Sachen** — ein schneller Überblick über die festgelegten Sachen.
 - **Wer bringt was mit?** — jede Rückmeldung, **inklusive der E-Mail-Adresse** (nur für dich sichtbar, nie öffentlich).
   Einträge ohne E-Mail zeigen „— (keine E-Mail)".
 - **CSV-Export** — lade alle Rückmeldungen (Name, E-Mail, bringt mit, Aktualisiert) als semikolon-getrennte UTF-8-Datei herunter, die
@@ -120,15 +120,15 @@ Kontaktiert werden nur Teilnehmende, die eine E-Mail angegeben haben. Das Nachri
 Sprache vorbelegt — passe sie vor dem Senden nach Belieben an.
 
 ## 8. Die Teilnahmeseite
-Das sehen Leute, wenn sie den geheimen Link öffnen. Sie haken die Dinge ab, die sie mitbringen, ergänzen optional ein Detail
-pro Ding und tragen ihren Namen ein (und die E-Mail, falls erforderlich). Ein erneutes Absenden mit der **gleichen E-Mail**
+Das sehen Leute, wenn sie den geheimen Link öffnen. Sie haken die Sachen ab, die sie mitbringen, ergänzen optional ein Detail
+pro Sache und tragen ihren Namen ein (und die E-Mail, falls erforderlich). Ein erneutes Absenden mit der **gleichen E-Mail**
 aktualisiert den vorherigen Eintrag, statt ein Duplikat anzulegen.
 
 | Desktop | Mobil |
 |---|---|
 | ![Teilnahmeseite](img/de/08-public-poll.png) | ![Teilnahmeseite auf dem Handy](img/de/09-public-poll-mobile.png) |
 
-Je nach Sichtbarkeit der Abfrage sehen sie außerdem einen Bereich **„Wer ist dabei"** (Namen oder Namen + Dinge). Nach dem
+Je nach Sichtbarkeit der Abfrage sehen sie außerdem einen Bereich **„Wer ist dabei"** (Namen oder Namen + Sachen). Nach dem
 Absenden erhalten sie eine freundliche Bestätigung:
 
 ![Danke](img/de/10-thanks.png)

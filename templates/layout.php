@@ -20,7 +20,7 @@
             <nav class="topnav">
                 <a href="<?= e(url('admin')) ?>"><?= e(t('nav.overview')) ?></a>
                 <a href="<?= e(url('admin.legal')) ?>"><?= e(t('nav.legal')) ?></a>
-                <a class="btn btn--ghost" href="<?= e(url('admin.poll_new')) ?>">＋ <?= e(t('nav.new_poll')) ?></a>
+                <a class="btn btn--ghost" href="<?= e(url('admin.poll_new')) ?>">+ <?= e(t('nav.new_poll')) ?></a>
                 <form method="post" action="<?= e(url('admin.logout')) ?>" class="inline">
                     <?= csrf_field() ?>
                     <button type="submit" class="linklike"><?= e(t('nav.logout')) ?></button>

@@ -73,7 +73,7 @@ $visKeys = ['who_and_what', 'names_only', 'none'];
             <?php endforeach; ?>
         </div>
         <div class="spacer-s"></div>
-        <button type="button" class="btn btn--ghost" id="addItem">＋ <?= e(t('form.add_thing')) ?></button>
+        <button type="button" class="btn btn--ghost" id="addItem">+ <?= e(t('form.add_thing')) ?></button>
     </div>
 
     <div class="card">

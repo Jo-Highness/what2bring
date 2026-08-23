@@ -4,7 +4,7 @@
         <p class="eyebrow"><?= e(t('dash.eyebrow')) ?></p>
         <h1><?= e(t('dash.title')) ?></h1>
     </div>
-    <a class="btn" href="<?= e(url('admin.poll_new')) ?>">＋ <?= e(t('nav.new_poll')) ?></a>
+    <a class="btn" href="<?= e(url('admin.poll_new')) ?>">+ <?= e(t('nav.new_poll')) ?></a>
 </div>
 
 <?php if (!$polls): ?>
