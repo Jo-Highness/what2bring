@@ -80,7 +80,7 @@ function clear_old(): void
     unset($_SESSION['old']);
 }
 
-/** German long date from an ISO YYYY-MM-DD string. */
+/** Long date (localized weekday) from an ISO YYYY-MM-DD string. */
 function fmt_date(?string $iso): string
 {
     if (!$iso) {
@@ -90,7 +90,13 @@ function fmt_date(?string $iso): string
     if ($t === false) {
         return $iso;
     }
-    $days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+    $weekdays = [
+        'de' => ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+        'en' => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        'es' => ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+    ];
+    $lang = function_exists('current_lang') ? current_lang() : 'de';
+    $days = $weekdays[$lang] ?? $weekdays['de'];
     return $days[(int) date('w', $t)] . ', ' . date('d.m.Y', $t);
 }
 
