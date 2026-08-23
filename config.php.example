@@ -18,6 +18,9 @@ return [
     // Public base URL WITHOUT trailing slash, used to build shareable links.
     'base_url' => 'https://fragmichnicht.de',
 
+    // Default UI language when the visitor has no preference: 'de', 'en' or 'es'.
+    'default_lang' => 'de',
+
     // Absolute path to the SQLite database file (kept outside the document root).
     'db_file' => __DIR__ . '/data/what2bring.sqlite',
 

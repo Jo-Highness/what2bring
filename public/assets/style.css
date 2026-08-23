@@ -173,6 +173,11 @@ table.data th { color: var(--muted); font-size: .8rem; text-transform: uppercase
 .footer__links a:hover { color: var(--text); }
 .legal-text { line-height: 1.65; max-width: 68ch; }
 .legal-text a { word-break: break-word; }
+.lang-switch { margin-left: 10px; display: inline-flex; gap: 6px; }
+.lang-switch a, .lang-switch strong { font-size: .82rem; letter-spacing: .03em; }
+.lang-switch a { color: var(--muted); text-decoration: none; }
+.lang-switch a:hover { color: var(--text); }
+.lang-switch strong { color: var(--accent-ink); }
 .center { text-align: center; }
 .big-emoji { font-size: 3rem; line-height: 1; }
 .spacer-s { height: 8px; }

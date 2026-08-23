@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+// First run: no config yet → hand over to the web installer (self-locks once written).
+if (!is_file(dirname(__DIR__) . '/config.php')) {
+    require __DIR__ . '/../inc/install.php';
+    exit;
+}
+
 require __DIR__ . '/../inc/bootstrap.php';
 
 $r = (string) ($_GET['r'] ?? '');
@@ -49,16 +55,16 @@ switch ($r) {
             csrf_check();
             $locked = login_locked_seconds();
             if ($locked > 0) {
-                flash("Zu viele Fehlversuche. Bitte $locked Sekunden warten.", 'error');
+                flash(t('msg.too_many', ['s' => $locked]), 'error');
                 redirect_route('admin.login');
             }
             if (admin_login(post('password'))) {
                 redirect_route('admin');
             }
-            flash('Falsches Passwort.', 'error');
+            flash(t('msg.wrong_password'), 'error');
             redirect_route('admin.login');
         }
-        view('admin/login', [], 'Anmeldung');
+        view('admin/login', [], t('title.login'));
         break;
 
     case 'admin.logout':
@@ -71,13 +77,13 @@ switch ($r) {
     /* ---- admin: dashboard ---- */
     case 'admin':
         require_admin();
-        view('admin/dashboard', ['polls' => admin_list_polls()], 'Übersicht');
+        view('admin/dashboard', ['polls' => admin_list_polls()], t('title.overview'));
         break;
 
     /* ---- admin: create ---- */
     case 'admin.poll_new':
         require_admin();
-        view('admin/poll_form', ['poll' => null, 'items' => []], 'Neue Abfrage');
+        view('admin/poll_form', ['poll' => null, 'items' => []], t('title.new_poll'));
         break;
 
     case 'admin.poll_create':
@@ -85,13 +91,13 @@ switch ($r) {
         csrf_check();
         $title = post('title');
         if ($title === '') {
-            flash('Bitte eine Überschrift angeben.', 'error');
+            flash(t('msg.need_title'), 'error');
             set_old($_POST);
             redirect_route('admin.poll_new');
         }
         $labels = array_values(array_filter(array_map('trim', $_POST['item_label'] ?? []), fn($l) => $l !== ''));
         if (!$labels) {
-            flash('Bitte mindestens ein benötigtes Ding angeben.', 'error');
+            flash(t('msg.need_thing'), 'error');
             set_old($_POST);
             redirect_route('admin.poll_new');
         }
@@ -104,7 +110,7 @@ switch ($r) {
             $labels
         );
         clear_old();
-        flash('Abfrage angelegt. Der Teilnahme-Link steht unten bereit.', 'success');
+        flash(t('msg.poll_created'), 'success');
         redirect_route('admin.poll_view', ['id' => $res['id']]);
 
     /* ---- admin: view one poll ---- */
@@ -113,7 +119,7 @@ switch ($r) {
         $poll = admin_get_poll((int) ($_GET['id'] ?? 0));
         if (!$poll) {
             http_response_code(404);
-            flash('Abfrage nicht gefunden.', 'error');
+            flash(t('msg.poll_not_found'), 'error');
             redirect_route('admin');
         }
         view('admin/poll_view', [
@@ -141,7 +147,7 @@ switch ($r) {
         header('Cache-Control: no-store');
         $out = fopen('php://output', 'w');
         fwrite($out, "\xEF\xBB\xBF"); // UTF-8 BOM so Excel shows umlauts correctly
-        fputcsv($out, ['Name', 'E-Mail', 'Bringt mit', 'Aktualisiert'], ';');
+        fputcsv($out, [t('view.col_name'), t('view.col_email'), t('view.col_brings'), t('view.col_updated')], ';');
         foreach ($rows as $c) {
             $parts = [];
             foreach ($c['items'] as $it) {
@@ -169,7 +175,7 @@ switch ($r) {
         view('admin/poll_form', [
             'poll'  => $poll,
             'items' => admin_get_items((int) $poll['id']),
-        ], 'Abfrage bearbeiten');
+        ], t('title.edit_poll'));
         break;
 
     case 'admin.poll_update':
@@ -183,7 +189,7 @@ switch ($r) {
         }
         $title = post('title');
         if ($title === '') {
-            flash('Bitte eine Überschrift angeben.', 'error');
+            flash(t('msg.need_title'), 'error');
             redirect_route('admin.poll_edit', ['id' => $id]);
         }
         admin_update_poll(
@@ -195,14 +201,14 @@ switch ($r) {
             (int) ($_POST['email_required'] ?? 1) ? 1 : 0,
             parse_items_from_post()
         );
-        flash('Änderungen gespeichert.', 'success');
+        flash(t('msg.saved'), 'success');
         redirect_route('admin.poll_view', ['id' => $id]);
 
     case 'admin.poll_delete':
         require_admin();
         csrf_check();
         admin_delete_poll((int) ($_GET['id'] ?? 0));
-        flash('Abfrage gelöscht.', 'success');
+        flash(t('msg.poll_deleted'), 'success');
         redirect_route('admin');
 
     case 'admin.poll_regen':
@@ -210,7 +216,7 @@ switch ($r) {
         csrf_check();
         $id = (int) ($_GET['id'] ?? 0);
         admin_regenerate_token($id);
-        flash('Neuer Link erzeugt — der alte Link funktioniert nicht mehr.', 'success');
+        flash(t('msg.link_regenerated'), 'success');
         redirect_route('admin.poll_view', ['id' => $id]);
 
     /* ---- admin: reminder ---- */
@@ -221,13 +227,17 @@ switch ($r) {
             http_response_code(404);
             redirect_route('admin');
         }
-        $defaultBody = (string) file_get_contents(__DIR__ . '/../templates/mail/reminder_default.txt');
+        $rbFile = __DIR__ . '/../templates/mail/reminder_default_' . current_lang() . '.txt';
+        if (!is_file($rbFile)) {
+            $rbFile = __DIR__ . '/../templates/mail/reminder_default.txt';
+        }
+        $defaultBody = (string) file_get_contents($rbFile);
         view('admin/reminder', [
             'poll'        => $poll,
             'recipients'  => admin_reminder_recipients((int) $poll['id']),
-            'defaultSubject' => 'Erinnerung: ' . $poll['title'],
+            'defaultSubject' => t('rem.default_subject', ['title' => $poll['title']]),
             'defaultBody' => $defaultBody,
-        ], 'Erinnerung senden');
+        ], t('title.reminder'));
         break;
 
     case 'admin.reminder_send':
@@ -265,13 +275,13 @@ switch ($r) {
             }
         }
         if ($sent > 0) {
-            flash("$sent Erinnerung(en) versendet.", 'success');
+            flash(t('msg.reminders_sent', ['n' => $sent]), 'success');
         }
         if ($failed > 0) {
-            flash("$failed Versand(e) fehlgeschlagen: " . implode(' | ', $errors), 'error');
+            flash(t('msg.reminders_failed', ['n' => $failed, 'errors' => implode(' | ', $errors)]), 'error');
         }
         if (!$recipients) {
-            flash('Es gibt noch keine Teilnehmenden, die erinnert werden könnten.', 'info');
+            flash(t('msg.no_recipients'), 'info');
         }
         redirect_route('admin.reminder', ['id' => $id]);
 
@@ -280,7 +290,7 @@ switch ($r) {
         $poll = public_get_poll_by_token((string) ($_GET['token'] ?? ''));
         if (!$poll) {
             http_response_code(404);
-            view('public/notfound', [], 'Nicht gefunden', true);
+            view('public/notfound', [], t('title.notfound'), true);
             break;
         }
         view('public/poll', [
@@ -296,7 +306,7 @@ switch ($r) {
         $poll = public_get_poll_by_token($token);
         if (!$poll) {
             http_response_code(404);
-            view('public/notfound', [], 'Nicht gefunden', true);
+            view('public/notfound', [], t('title.notfound'), true);
             break;
         }
         csrf_check();
@@ -311,17 +321,17 @@ switch ($r) {
 
         $problems = [];
         if ($name === '') {
-            $problems[] = 'Bitte den Namen angeben.';
+            $problems[] = t('msg.need_name');
         }
         if ((int) ($poll['email_required'] ?? 1) === 1) {
             if (!is_valid_email($email)) {
-                $problems[] = 'Bitte eine gültige E-Mail-Adresse angeben.';
+                $problems[] = t('msg.need_email');
             }
         } elseif ($email !== '' && !is_valid_email($email)) {
-            $problems[] = 'Die E-Mail-Adresse ist ungültig.';
+            $problems[] = t('msg.email_invalid');
         }
         if (!$selections) {
-            $problems[] = 'Bitte mindestens ein Ding auswählen, das du mitbringst.';
+            $problems[] = t('msg.need_selection');
         }
         if ($problems) {
             foreach ($problems as $p) {
@@ -340,7 +350,7 @@ switch ($r) {
         $poll = public_get_poll_by_token((string) ($_GET['token'] ?? ''));
         if (!$poll) {
             http_response_code(404);
-            view('public/notfound', [], 'Nicht gefunden', true);
+            view('public/notfound', [], t('title.notfound'), true);
             break;
         }
         $name = (string) ($_SESSION['thanks_name'] ?? '');
@@ -349,16 +359,16 @@ switch ($r) {
             'poll'  => $poll,
             'name'  => $name,
             'token' => $poll['token'],
-        ], 'Danke', true);
+        ], t('title.thanks'), true);
         break;
 
     /* ---- public: Impressum / Datenschutz (frei erreichbar, kein Login/Token) ---- */
     case 'impressum':
-        view('public/legal', ['heading' => 'Impressum', 'text' => get_setting('impressum')], 'Impressum', true);
+        view('public/legal', ['heading' => t('nav.impressum'), 'text' => get_setting('impressum')], t('title.impressum'), true);
         break;
 
     case 'datenschutz':
-        view('public/legal', ['heading' => 'Datenschutzerklärung', 'text' => get_setting('datenschutz')], 'Datenschutz', true);
+        view('public/legal', ['heading' => t('legal.datenschutz'), 'text' => get_setting('datenschutz')], t('title.datenschutz'), true);
         break;
 
     /* ---- admin: Rechtliches (Impressum + Datenschutz pflegen) ---- */
@@ -369,7 +379,7 @@ switch ($r) {
         view('admin/legal', [
             'impressum'   => $imp !== '' ? $imp : legal_default('impressum'),
             'datenschutz' => $dat !== '' ? $dat : legal_default('datenschutz'),
-        ], 'Rechtliches');
+        ], t('title.legal'));
         break;
 
     case 'admin.legal_save':
@@ -377,7 +387,7 @@ switch ($r) {
         csrf_check();
         set_setting('impressum', trim((string) ($_POST['impressum'] ?? '')));
         set_setting('datenschutz', trim((string) ($_POST['datenschutz'] ?? '')));
-        flash('Rechtliche Texte gespeichert.', 'success');
+        flash(t('msg.legal_saved'), 'success');
         redirect_route('admin.legal');
 
     default:

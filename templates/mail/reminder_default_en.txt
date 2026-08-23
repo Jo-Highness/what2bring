@@ -1,0 +1,14 @@
+Hello {name},
+
+thank you so much for helping out at the event! Just a quick reminder about "{ueberschrift}".
+
+You had agreed to bring:
+{was_ich_mitbringe}
+
+Everything is needed on {datum}.
+
+If anything has changed, you can adjust your entry anytime via your personal link.
+
+Many thanks and see you soon!
+
+Your organizing team

@@ -22,6 +22,6 @@ function csrf_check(): void
     $have = (string) ($_SESSION['csrf'] ?? '');
     if ($have === '' || !hash_equals($have, $sent)) {
         http_response_code(400);
-        exit('Ungültiges oder abgelaufenes Formular (CSRF). Bitte die Seite neu laden und erneut versuchen.');
+        exit(function_exists('t') ? t('msg.csrf') : 'Invalid or expired form (CSRF). Please reload the page and try again.');
     }
 }

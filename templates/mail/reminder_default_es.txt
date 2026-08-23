@@ -1,0 +1,14 @@
+Hola {name}:
+
+¡Muchas gracias por echar una mano en la fiesta! Un breve recordatorio sobre «{ueberschrift}».
+
+Habías dicho que traerías:
+{was_ich_mitbringe}
+
+Todo se necesita el {datum}.
+
+Si algo ha cambiado, puedes modificar tu indicación en cualquier momento a través de tu enlace personal.
+
+¡Muchas gracias y hasta pronto!
+
+El equipo organizador

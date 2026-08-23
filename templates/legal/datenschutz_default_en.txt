@@ -1,0 +1,55 @@
+Privacy Policy
+
+1. Controller
+The controller responsible for data processing on this website is:
+[Full name]
+[Street and number]
+[Postal code, City]
+Email: [Email address]
+
+2. Purpose of the application
+This website is used to organize, for club events and similar occasions, who
+brings which items (e.g. cake, salad). Participants sign up via a personal link.
+
+3. What data we process
+When you sign up for a request, we process:
+- your name,
+- your email address,
+- your information about which items you will bring (including optional details),
+- the time of sign-up/change.
+Your email address is used exclusively internally for organization
+(e.g. reminders) and is not shown to other participants.
+
+4. Purpose and legal basis of the processing
+The processing takes place to organize the respective event and to send
+reminders. The legal basis is your consent through voluntary sign-up
+(Art. 6 (1) (a) GDPR) as well as the legitimate interest in smooth
+organization (Art. 6 (1) (f) GDPR).
+
+5. Recipients / disclosure
+Your data is not passed on to third parties for their own purposes.
+The website is operated at our hosting provider [Hosting provider, e.g. Strato AG],
+which processes the data on our behalf (processing on behalf of the controller
+pursuant to Art. 28 GDPR). An email/SMTP service is used to send emails.
+
+6. Storage period
+We store your data only as long as it is required for the respective event,
+and delete it afterwards or upon your request.
+
+7. Your rights
+You have the right of access (Art. 15), rectification (Art. 16), erasure
+(Art. 17), restriction of processing (Art. 18), data portability
+(Art. 20) and objection (Art. 21 GDPR). You can withdraw any consent given
+at any time with effect for the future. To do so, contact the controller
+named above. You also have the right to lodge a complaint with a
+data protection supervisory authority.
+
+8. Cookies
+No cookies for tracking purposes are set in the public participation area.
+In the admin area, a technically necessary session cookie is used to keep
+you logged in.
+
+9. No automated decision-making
+Automated decision-making, including profiling, does not take place.
+
+Last updated: [Date]

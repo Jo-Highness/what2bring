@@ -19,10 +19,16 @@ function set_setting(string $key, string $value): void
     $st->execute([$key, $value]);
 }
 
-/** Load a bundled default template (used to pre-fill the admin editor). */
+/** Load a bundled default template (used to pre-fill the admin editor), language-aware. */
 function legal_default(string $key): string
 {
-    $file = dirname(__DIR__) . '/templates/legal/' . $key . '_default.txt';
-    $txt = @file_get_contents($file);
-    return $txt !== false ? $txt : '';
+    $lang = function_exists('current_lang') ? current_lang() : 'de';
+    $dir = dirname(__DIR__) . '/templates/legal/';
+    foreach ([$key . '_default_' . $lang . '.txt', $key . '_default.txt'] as $name) {
+        $txt = @file_get_contents($dir . $name);
+        if ($txt !== false) {
+            return $txt;
+        }
+    }
+    return '';
 }

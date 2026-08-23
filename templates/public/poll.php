@@ -1,12 +1,13 @@
 <?php
 /** @var array $poll; @var array $items; @var array $summary; @var array $names */
 $token = $poll['token'];
+$emailReq = (int) ($poll['email_required'] ?? 1);
 ?>
 <div class="card card--pad-lg">
-    <p class="eyebrow">Wer bringt was mit?</p>
+    <p class="eyebrow"><?= e(t('poll.eyebrow')) ?></p>
     <h1><?= e($poll['title']) ?></h1>
     <?php if ($poll['event_date']): ?>
-        <p class="muted" style="margin-top:-4px;">📅 Benötigt am <strong><?= e(fmt_date($poll['event_date'])) ?></strong></p>
+        <p class="muted" style="margin-top:-4px;">📅 <?= e(t('poll.needed_on')) ?> <strong><?= e(fmt_date($poll['event_date'])) ?></strong></p>
     <?php endif; ?>
     <?php if ($poll['description']): ?>
         <p style="white-space:pre-line;"><?= e($poll['description']) ?></p>
@@ -14,14 +15,14 @@ $token = $poll['token'];
 </div>
 
 <?php if (!$items): ?>
-    <div class="card"><p class="muted" style="margin:0;">Für diese Abfrage wurden noch keine Dinge hinterlegt.</p></div>
+    <div class="card"><p class="muted" style="margin:0;"><?= e(t('poll.no_things')) ?></p></div>
 <?php else: ?>
 <form method="post" action="<?= e(base_url()) ?>/index.php?<?= e(http_build_query(['r' => 'poll_submit', 'token' => $token])) ?>">
     <?= csrf_field() ?>
 
     <div class="card">
-        <h2>Was möchtest du mitbringen?</h2>
-        <p class="hint" style="margin-bottom:14px;">Mehrfachauswahl möglich. Du kannst zu jedem Ding noch Details angeben.</p>
+        <h2><?= e(t('poll.choose_title')) ?></h2>
+        <p class="hint" style="margin-bottom:14px;"><?= e(t('poll.choose_hint')) ?></p>
         <ul class="bring">
             <?php foreach ($items as $it): $iid = (int) $it['id']; ?>
                 <li class="bring__item" data-checked="0">
@@ -30,7 +31,7 @@ $token = $poll['token'];
                         <label for="item<?= $iid ?>"><?= e($it['label']) ?></label>
                     </div>
                     <div class="bring__detail" hidden>
-                        <input type="text" name="detail[<?= $iid ?>]" placeholder="Details, z. B. „2 Bleche Marmorkuchen“">
+                        <input type="text" name="detail[<?= $iid ?>]" placeholder="<?= e(t('poll.detail_ph')) ?>">
                     </div>
                 </li>
             <?php endforeach; ?>
@@ -38,21 +39,18 @@ $token = $poll['token'];
     </div>
 
     <div class="card stack">
-        <h2>Deine Angaben</h2>
+        <h2><?= e(t('poll.your_data')) ?></h2>
         <div class="field">
-            <label for="name">Name *</label>
+            <label for="name"><?= e(t('poll.name')) ?> *</label>
             <input type="text" id="name" name="name" value="<?= e((string) old('name')) ?>" autocomplete="name" required>
         </div>
-        <?php $emailReq = (int) ($poll['email_required'] ?? 1); ?>
         <div class="field">
-            <label for="email">E-Mail <?= $emailReq ? '*' : '<span class="muted" style="font-weight:400;">(optional)</span>' ?></label>
+            <label for="email"><?= e(t('poll.email')) ?> <?= $emailReq ? '*' : '<span class="muted" style="font-weight:400;">' . e(t('poll.optional')) . '</span>' ?></label>
             <input type="email" id="email" name="email" value="<?= e((string) old('email')) ?>" autocomplete="email" <?= $emailReq ? 'required' : '' ?>>
-            <p class="hint"><?= $emailReq
-                ? 'Nur für die Orga (z. B. Erinnerungen) — sie wird niemandem sonst angezeigt.'
-                : 'Optional. Nur für die Orga (z. B. Erinnerungen), niemandem sonst sichtbar. Ohne E-Mail bekommst du keine Erinnerung.' ?></p>
+            <p class="hint"><?= $emailReq ? e(t('poll.email_hint_required')) : e(t('poll.email_hint_optional')) ?></p>
         </div>
         <div class="btn-row">
-            <button type="submit" class="btn btn--lg">Eintragen</button>
+            <button type="submit" class="btn btn--lg"><?= e(t('poll.submit')) ?></button>
         </div>
     </div>
 </form>
@@ -60,7 +58,7 @@ $token = $poll['token'];
 
 <?php if ($poll['visibility'] === 'who_and_what' && $items): ?>
     <div class="card">
-        <h2>Schon dabei</h2>
+        <h2><?= e(t('poll.already_title')) ?></h2>
         <ul class="summary">
             <?php foreach ($summary as $it): ?>
                 <li class="summary__item">
@@ -72,7 +70,7 @@ $token = $poll['token'];
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <div class="summary__names muted">Noch niemand — magst du?</div>
+                        <div class="summary__names muted"><?= e(t('poll.nobody_yet')) ?></div>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>
@@ -80,7 +78,7 @@ $token = $poll['token'];
     </div>
 <?php elseif ($poll['visibility'] === 'names_only' && $names): ?>
     <div class="card">
-        <h2>Schon dabei (<?= count($names) ?>)</h2>
+        <h2><?= e(t('poll.already_names', ['n' => count($names)])) ?></h2>
         <div class="tag-people">
             <?php foreach ($names as $n): ?><span class="person"><?= e($n) ?></span><?php endforeach; ?>
         </div>

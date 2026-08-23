@@ -1,6 +1,6 @@
 <?php /** @var string $title, $content; @var array $flashes; @var bool $public */ ?>
 <!doctype html>
-<html lang="de">
+<html lang="<?= e(current_lang()) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,12 +18,12 @@
         </a>
         <?php if (!($public ?? false) && is_admin()): ?>
             <nav class="topnav">
-                <a href="<?= e(url('admin')) ?>">Übersicht</a>
-                <a href="<?= e(url('admin.legal')) ?>">Rechtliches</a>
-                <a class="btn btn--ghost" href="<?= e(url('admin.poll_new')) ?>">＋ Neue Abfrage</a>
+                <a href="<?= e(url('admin')) ?>"><?= e(t('nav.overview')) ?></a>
+                <a href="<?= e(url('admin.legal')) ?>"><?= e(t('nav.legal')) ?></a>
+                <a class="btn btn--ghost" href="<?= e(url('admin.poll_new')) ?>">＋ <?= e(t('nav.new_poll')) ?></a>
                 <form method="post" action="<?= e(url('admin.logout')) ?>" class="inline">
                     <?= csrf_field() ?>
-                    <button type="submit" class="linklike">Abmelden</button>
+                    <button type="submit" class="linklike"><?= e(t('nav.logout')) ?></button>
                 </form>
             </nav>
         <?php endif; ?>
@@ -39,8 +39,16 @@
 
 <footer class="footer">
     <div class="wrap footer__inner">
-        <p>Wer bringt was mit? · <span class="muted">Vereinsfeste ganz einfach organisieren</span></p>
-        <p class="footer__links"><a href="<?= e(url('impressum')) ?>">Impressum</a> · <a href="<?= e(url('datenschutz')) ?>">Datenschutz</a></p>
+        <p><?= e(t('footer.tagline')) ?> · <span class="muted"><?= e(t('footer.subtitle')) ?></span></p>
+        <p class="footer__links">
+            <a href="<?= e(url('impressum')) ?>"><?= e(t('nav.impressum')) ?></a> ·
+            <a href="<?= e(url('datenschutz')) ?>"><?= e(t('nav.datenschutz')) ?></a>
+            <span class="lang-switch">
+                <?php foreach (available_langs() as $code => $label): ?>
+                    <?php if ($code === current_lang()): ?><strong><?= e(strtoupper($code)) ?></strong><?php else: ?><a href="<?= e(lang_switch_url($code)) ?>" hreflang="<?= e($code) ?>"><?= e(strtoupper($code)) ?></a><?php endif; ?>
+                <?php endforeach; ?>
+            </span>
+        </p>
     </div>
 </footer>
 </body>

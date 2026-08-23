@@ -1,0 +1,58 @@
+Política de privacidad
+
+1. Responsable
+El responsable del tratamiento de datos en este sitio web es:
+[Nombre y apellidos]
+[Calle y número]
+[Código postal, Ciudad]
+Correo electrónico: [Correo electrónico]
+
+2. Finalidad de la aplicación
+Este sitio web sirve para organizar, en fiestas de club y eventos similares,
+quién trae qué cosas (p. ej. tarta, ensalada). Los participantes se apuntan a
+través de un enlace personal.
+
+3. Qué datos tratamos
+Cuando te apuntas a una lista, tratamos:
+- tu nombre,
+- tu dirección de correo electrónico,
+- tu indicación sobre qué cosas traes (incluidos detalles opcionales),
+- la fecha y hora de tu inscripción/modificación.
+Tu dirección de correo electrónico se utiliza exclusivamente de forma interna
+para la organización (p. ej. recordatorios) y no se muestra a los demás
+participantes.
+
+4. Finalidad y base jurídica del tratamiento
+El tratamiento se realiza para organizar el evento correspondiente y para el
+envío de recordatorios. La base jurídica es tu consentimiento mediante la
+inscripción voluntaria (art. 6, apdo. 1, letra a RGPD), así como el interés
+legítimo en una organización sin contratiempos (art. 6, apdo. 1, letra f RGPD).
+
+5. Destinatarios / Cesión
+No se ceden tus datos a terceros para fines propios de estos.
+El sitio web se aloja en nuestro proveedor de hosting [Proveedor de hosting, p. ej. Strato AG],
+que trata los datos por encargo nuestro (encargo del tratamiento conforme al
+art. 28 RGPD). Para el envío de correos se utiliza un servicio de correo/SMTP.
+
+6. Plazo de conservación
+Conservamos tus datos solo durante el tiempo necesario para el evento
+correspondiente y los eliminamos después o cuando lo solicites.
+
+7. Tus derechos
+Tienes derecho de acceso (art. 15), rectificación (art. 16), supresión
+(art. 17), limitación del tratamiento (art. 18), portabilidad de los datos
+(art. 20) y oposición (art. 21 RGPD). Puedes revocar en cualquier momento un
+consentimiento otorgado, con efecto para el futuro. Para ello, dirígete al
+responsable indicado arriba. Además, tienes derecho a presentar una reclamación
+ante una autoridad de control de protección de datos.
+
+8. Cookies
+En la zona pública de participación no se utilizan cookies con fines de
+seguimiento. En la zona de administración se utiliza una cookie de sesión
+técnicamente necesaria para mantener la sesión iniciada.
+
+9. Ninguna decisión automatizada
+No se realiza ninguna decisión automatizada, incluida la elaboración de
+perfiles.
+
+Última actualización: [Fecha]
