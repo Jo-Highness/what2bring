@@ -1,82 +1,78 @@
-# What2Bring
+# 🧺 What2Bring
 
-PHP 8 + SQLite Web-App für Vereinsfeste: **Wer bringt was mit?** Eine Orga-Person
-(Admin) legt Mitbring-Abfragen an (Kuchen, Salat, Obst …) und teilt je Abfrage
-einen **geheimen Link**. Teilnehmende tragen **ohne Login** über diesen Link ein,
-was sie mitbringen. Strato-tauglich: **kein Composer/Build**, reines PHP, eigener
-abhängigkeitsfreier SMTP-Client. **E-Mail-Adressen bleiben strikt intern** (nie
-auf öffentlichen Seiten).
+**“Who brings what?”** — a small, self‑hosted web app for organising club parties, potlucks and team events.
+An organiser creates a *request* listing the things that are needed (cake, salad, drinks …) and shares **one secret
+link**. People open the link, tick what they’ll bring, add a detail, and leave their name. No accounts, no app.
 
-> Kein MCP-Server, kein Reverse-Proxy nötig. Klassische PHP-App für Shared-Hosting.
-> Hosting-Domain: **fragmichnicht.de**. Repo: gitea `jarvis/what2bring` (Branch `main`).
-> QA: PASS 21/21 (Suite `ebc330e4`). Clean-Room-Anforderungen: infrastructure-docs, requirements-Doc `1dc5fb32`.
+**PHP 8 + SQLite · no Composer · no build step · runs on cheap shared hosting.**
+Available in **🇩🇪 German · 🇬🇧 English · 🇪🇸 Spanish**.
 
-## Funktionen
-- **Admin (passwortgeschützt):** Abfragen anlegen/bearbeiten/löschen (Überschrift,
-  Beschreibung, „benötigt am"-Datum, dynamische Dinge-Liste, Sichtbarkeit); teilbarer
-  Geheim-Link inkl. „neu erzeugen" (alter wird ungültig); Erinnerungsmails mit
-  Platzhaltern `{name}`/`{ueberschrift}`/`{datum}`/`{was_ich_mitbringe}`, **Einzelversand**.
-- **Teilnehmende (nur per Token):** Mehrfachauswahl der Dinge + optionales Detailfeld;
-  Name + E-Mail Pflicht; erneutes Absenden mit gleicher E-Mail aktualisiert den eigenen
-  Eintrag; optional Mitbring-Ansicht (nur Namen), je nach Admin-Sichtbarkeit.
-- **Sichtbarkeit je Abfrage:** `who_and_what` | `names_only` | `none` — **E-Mail nie**.
-- **Rechtliches:** Impressum + Datenschutzerklärung werden über die Admin-Seite
-  „Rechtliches" gepflegt (in der DB, nicht im Code), mit Vorlagen zum Ausfüllen;
-  öffentlich unter `?r=impressum` / `?r=datenschutz`, von jeder Seite im Footer verlinkt.
+![What2Bring dashboard and participation page](docs/img/05-poll-view.png)
 
-## Konfiguration (`config.php`, nicht eingecheckt)
-`config.php.example` nach `config.php` kopieren (eine Ebene **über** dem Docroot
-`public/`) und ausfüllen:
-- `admin_password_hash` — `php -r "echo password_hash('DEIN-PASSWORT', PASSWORD_DEFAULT), PHP_EOL;"`
-- `app_pepper` — `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` (stabil halten!)
-- `base_url` — öffentliche Basis-URL ohne Slash, z. B. `https://fragmichnicht.de`
-- `db_file` — absoluter Pfad zur SQLite-Datei (außerhalb des Docroots)
-- `mail_dry_run` — `true` = kein echter Versand, Mails landen in `data/mail.log`
-- `smtp{}` — Host/Port/secure/User/Pass/from/verify_tls für den echten Versand
+## Features
+- **Requests** with a heading, description, “needed by” date and a dynamic list of items.
+- **Secret share link** per request (rotatable — the old link stops working) so search engines stay out (`noindex`).
+- **Participant page, no login:** multi‑select items, a detail per item, name + email. Re‑submitting with the same
+  email updates the previous entry instead of duplicating it.
+- **Per‑request email toggle** — make the email address required or optional.
+- **Visibility per request:** show *who & what* · *names only* · *nothing* — **email addresses are never shown publicly.**
+- **Reminder emails** with placeholders, sent **individually** (one recipient per message, no CC/BCC).
+- **CSV export** of all responses (Excel‑friendly).
+- **Imprint & privacy policy** editable in the admin area (stored in the DB, with templates to fill in).
+- **Web installer** — first visit writes `config.php` for you.
+- **Privacy‑first:** email plaintext lives in a separate table the public code path never reads; CSRF on every form;
+  prepared statements; output escaping.
 
-**Keine Secret-Werte ins Repo.** Die leere DB wird beim ersten Zugriff aus
-`schema.sql` initialisiert (WAL, foreign_keys on).
+## Screenshots
+| Setup wizard | New request | Reminder |
+|---|---|---|
+| ![Installer](docs/img/01-installer.png) | ![New request](docs/img/04-new-poll.png) | ![Reminder](docs/img/06-reminder.png) |
 
-## Lokal starten
-    cp config.php.example config.php   # Werte ausfüllen (Hash + Pepper generieren)
-    php -S 127.0.0.1:8479 -t public
-    # -> http://127.0.0.1:8479/index.php?r=admin.login
+| Participant page | On mobile | Imprint |
+|---|---|---|
+| ![Participant page](docs/img/08-public-poll.png) | ![Mobile](docs/img/09-public-poll-mobile.png) | ![Imprint](docs/img/11-impressum.png) |
 
-## Docker-Test
-    docker compose up -d               # baut Image, Container "what2bring"
-    # -> http://<host>:8470/index.php?r=admin.login
-- Port **8470** (Host) -> 80 (Container), **plain HTTP** (nicht hinter dem mTLS-Proxy).
-- Mounts: `./data -> /var/www/html/data` (SQLite + `mail.log`),
-  `./config.php -> /var/www/html/config.php:ro`.
-- Apache-Docroot ist `public/`; `pdo_sqlite`, `rewrite`, `headers` sind im Image aktiv.
-- Auf der Test-Site **`mail_dry_run = true`** setzen, damit keine echten Mails rausgehen.
+## Quick start
+1. **Requirements:** PHP 8.0+ with `pdo_sqlite`. That’s it.
+2. **Upload the code** and point your domain’s document root at the **`public/`** folder (everything sensitive then
+   sits above the web root). If you can’t move the docroot, the bundled top‑level `.htaccess` blocks direct access
+   to `inc/`, `data/`, `templates/`, `config.php` and `schema.sql` instead.
+3. **Open the site in your browser.** On the first visit the **setup wizard** appears — set an admin password, the
+   base URL, the default language and (optionally) SMTP, then click *Create configuration*. The installer writes
+   `config.php` and locks itself.
+4. **Make `data/` writable** — the SQLite database is created automatically on first use.
 
-## Strato-Deployment (Prod, Domain fragmichnicht.de)
-- Bevorzugt: **Domain-Docroot auf `public/`** zeigen lassen. Dann liegen `config.php`,
-  `data/`, `inc/`, `templates/`, `schema.sql` **oberhalb** des Docroots.
-- Falls der Docroot **nicht** verschiebbar ist: die mitgelieferte **Fallback-`.htaccess`**
-  im Projekt-Root sperrt `inc/`, `data/`, `templates/`, `config.php`, `schema.sql`, Dotfiles.
-- `data/.htaccess` verbietet zusätzlich HTTP-Zugriff aufs Datenverzeichnis.
-- Routing ist query-basiert (`index.php?r=…`), **mod_rewrite ist nicht erforderlich**.
-- `mail_dry_run = false` erst setzen, wenn echte SMTP-Zugangsdaten hinterlegt sind.
+> **Manual config instead of the wizard:** copy `config.php.example` to `config.php` (one level **above** `public/`)
+> and fill it in. `mail_dry_run: true` keeps you in a safe test mode (reminders go to `data/mail.log`).
 
-## Sicherheit & Datenschutz (Kurz)
-- E-Mail-Klartext liegt **isoliert** in einer eigenen Kontakt-Tabelle, die der
-  öffentliche Datenpfad **nie** liest → strukturell keine E-Mail auf öffentlichen Seiten.
-- Dedup/Upsert über **HMAC-Hash der E-Mail mit geheimem Pepper** (nicht umkehrbar).
-- CSRF-Token auf allen POST-Formularen; Prepared Statements; Output-Escaping.
-- `noindex`/`X-Robots-Tag`/`Referrer-Policy: no-referrer`/`nosniff`/`X-Frame-Options: DENY`
-  (per PHP **und** `.htaccess`); `robots.txt` disallow all.
-- Geheim-Token >=128 Bit, URL-safe; per „neu erzeugen" rotierbar.
-- Admin-Login: Password-Hash (kein Klartext) + Login-Throttling.
+### Try it locally
+```bash
+cp config.php.example config.php      # or just open the site and use the installer
+php -S 127.0.0.1:8080 -t public
+# → http://127.0.0.1:8080/
+```
 
-## Backup & Betrieb
-- **Kein App-eigenes Backup.** Sicherung = SQLite-Datei aus `data/` (bzw. Strato-Backup).
-- SMTP-Zugangsdaten kommen vom Betreiber und stehen nur in `config.php`.
-- Betriebsdetails: Runbook `what2bring` (infrastructure-docs).
+### Docker (test container)
+```bash
+docker compose up -d --build          # php:apache, docroot public/, port 8470
+```
+Mounts `./data` (SQLite + mail log) and `./config.php`.
 
-## Troubleshooting
-- **„Konfiguration fehlt"**: `config.php` liegt nicht eine Ebene über `public/` bzw. fehlt.
-- **Teilnahme-Link 404**: Token falsch/rotiert (Regenerate macht alte Links ungültig).
-- **Mails kommen nicht an**: `mail_dry_run` prüfen; bei `false` SMTP-Zugang/`verify_tls`
-  prüfen; im Dry-Run `data/mail.log` ansehen.
+## 📖 Documentation
+A full, illustrated handbook is included:
+
+- **[English handbook](docs/HANDBOOK.md)**
+- **[Handbuch (Deutsch)](docs/HANDBUCH.md)**
+
+It walks through installation, creating and sharing requests, reminders, the legal pages, languages, security and
+deployment — with screenshots.
+
+## Security & privacy
+- Emails **never** appear on public pages (structurally separated in the data model).
+- Secret links use ≥128‑bit random tokens, are `noindex`, and can be rotated.
+- CSRF tokens on every form; prepared statements throughout; all output HTML‑escaped.
+- Admin login stores only a password hash and throttles repeated failures.
+- The legal‑text templates are a **starting draft, not legal advice** — review before going live.
+
+## License
+MIT — see [LICENSE](LICENSE).
