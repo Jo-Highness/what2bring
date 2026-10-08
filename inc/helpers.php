@@ -13,6 +13,15 @@ function token_new(int $bytes = 16): string
     return rtrim(strtr(base64_encode(random_bytes($bytes)), '+/', '-_'), '=');
 }
 
+/**
+ * Neutralise spreadsheet formulas in CSV cells (CSV/formula injection): participant
+ * names/details are public input and the export is opened in Excel/LibreOffice.
+ */
+function csv_safe(string $v): string
+{
+    return ($v !== '' && strpbrk($v[0], "=+-@\t\r") !== false) ? "'" . $v : $v;
+}
+
 /** Stable, non-reversible dedup key for an e-mail address. */
 function email_hash(string $email): string
 {

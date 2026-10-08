@@ -154,12 +154,12 @@ switch ($r) {
                 $d = trim((string) ($it['detail'] ?? ''));
                 $parts[] = $d !== '' ? $it['label'] . ' (' . $d . ')' : $it['label'];
             }
-            fputcsv($out, [
+            fputcsv($out, array_map('csv_safe', [
                 (string) $c['name'],
                 (string) ($c['email'] ?? ''),
                 implode('; ', $parts),
                 (string) ($c['updated_at'] ?: $c['created_at']),
-            ], ';');
+            ]), ';');
         }
         fclose($out);
         exit;

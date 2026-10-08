@@ -22,6 +22,20 @@ function mail_encode_header(string $value): string
     return $value;
 }
 
+/**
+ * Display name for From/To. Participant names are public input: ASCII specials
+ * (<>,;:"@ etc.) would otherwise let a name like `x <a@evil>, y` reshape the
+ * address header, so such names are always sent as an RFC 2047 encoded-word.
+ */
+function mail_encode_name(string $name): string
+{
+    $name = str_replace(["\r", "\n", "\0"], '', $name);
+    if (preg_match('/[^\x20-\x7E]|[<>(),;:"@\[\]\\\\.]/', $name)) {
+        return '=?UTF-8?B?' . base64_encode($name) . '?=';
+    }
+    return $name;
+}
+
 /** Guard against header injection in an address (local display only). */
 function mail_clean_addr(string $addr): string
 {
@@ -41,8 +55,8 @@ function send_mail(string $to_email, string $to_name, string $subject, string $b
 
     $headers = [];
     $headers[] = 'Date: ' . date('r');
-    $headers[] = 'From: ' . mail_encode_header($from_name) . ' <' . $from_email . '>';
-    $headers[] = 'To: ' . mail_encode_header($to_name) . ' <' . $to_email . '>';
+    $headers[] = 'From: ' . mail_encode_name($from_name) . ' <' . $from_email . '>';
+    $headers[] = 'To: ' . mail_encode_name($to_name) . ' <' . $to_email . '>';
     $headers[] = 'Subject: ' . mail_encode_header($subject);
     $headers[] = 'MIME-Version: 1.0';
     $headers[] = 'Content-Type: text/plain; charset=UTF-8';

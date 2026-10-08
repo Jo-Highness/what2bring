@@ -7,7 +7,9 @@
 </IfModule>
 
 # Deny the sensitive top-level paths outright.
-RedirectMatch 404 ^/(inc|data|templates)(/|$)
+RedirectMatch 404 ^/(inc|data|templates|docs)(/|$)
+# Dot-directories (e.g. a deployed .git/) - FilesMatch below only sees file names.
+RedirectMatch 404 /\.(?!well-known/)
 <FilesMatch "(config\.php|config\.php\.example|schema\.sql|composer\.(json|lock)|\.gitignore)$">
     Require all denied
 </FilesMatch>
