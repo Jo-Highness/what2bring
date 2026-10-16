@@ -45,12 +45,13 @@ RUN a2enmod headers \
 COPY --chown=root:root . /var/www/html
 COPY --chmod=0755 docker/entrypoint.sh /usr/local/bin/w2b-entrypoint
 
-USER www-data
+# www-data (uid/gid 33 in the Debian-based php image); numeric so hosts can resolve it.
+USER 33:33
 EXPOSE 8080
 VOLUME ["/data"]
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD php -r 'exit(trim((string) @file_get_contents("http://127.0.0.1:8080/index.php?r=health")) === "ok" ? 0 : 1);'
+  CMD ["php", "-r", "exit(trim((string) @file_get_contents('http://127.0.0.1:8080/index.php?r=health')) === 'ok' ? 0 : 1);"]
 
 ENTRYPOINT ["w2b-entrypoint"]
 CMD ["apache2-foreground"]
