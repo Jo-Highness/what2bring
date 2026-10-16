@@ -1,7 +1,10 @@
 <?php
-// Copy this file to ../config.php (one level ABOVE the public/ document root)
-// and fill in real values. config.php must NOT be committed and must NOT be
-// served over HTTP.
+// What2Bring configuration (manual alternative to the web installer).
+//
+// Copy this file to ../config.php (one level ABOVE the public/ document root) — or
+// to the path given in the environment variable W2B_CONFIG — and fill in real
+// values. config.php must NOT be committed and must NOT be served over HTTP.
+// Every value can also be set (and overridden) via environment variables, see README.
 //
 // Generate the admin password hash on any PHP CLI:
 //   php -r "echo password_hash('YOUR-PASSWORD', PASSWORD_DEFAULT), PHP_EOL;"
@@ -16,17 +19,40 @@ return [
     'app_pepper' => 'replace_me_with_64_hex_chars_from_random_bytes_32',
 
     // Public base URL WITHOUT trailing slash, used to build shareable links.
-    'base_url' => 'https://fragmichnicht.de',
+    'base_url' => 'https://events.example.org',
 
     // Default UI language when the visitor has no preference: 'de', 'en' or 'es'.
     'default_lang' => 'de',
 
-    // Absolute path to the SQLite database file (kept outside the document root).
+    // Absolute path to the SQLite database file (must be outside the document root).
     'db_file' => __DIR__ . '/data/what2bring.sqlite',
 
-    // Optional: skip real SMTP and write outgoing mails to data/mail.log instead.
-    // Set to true for a dry-run, false to actually send.
+    // true = do not send mails; write them to mail.log (next to the database) instead.
     'mail_dry_run' => false,
+
+    // What the dry-run log contains: 'redacted' (recipient address masked),
+    // 'full' (complete message incl. address — personal data!) or 'off'.
+    'mail_log' => 'redacted',
+
+    // Reverse proxies allowed to set X-Forwarded-For / X-Forwarded-Proto
+    // (IP addresses or CIDR ranges). Empty = headers are ignored.
+    'trusted_proxies' => [],
+
+    // Send Strict-Transport-Security on HTTPS requests.
+    'hsts' => true,
+
+    // Log the admin out after this many seconds of inactivity.
+    'admin_idle_timeout' => 1800,
+
+    // Data minimisation: delete polls (incl. all entries) N days after their date
+    // (or after creation if they have no date). 0 = never delete automatically.
+    'purge_after_days' => 0,
+
+    // Max. public submissions per IP address and poll within 10 minutes (0 = unlimited).
+    'submit_rate_limit' => 20,
+
+    // Send participants a confirmation mail with their personal edit link.
+    'confirmation_mail' => false,
 
     // SMTP for the reminder e-mails (individual send, one recipient per message).
     'smtp' => [
@@ -35,8 +61,8 @@ return [
         'secure'     => 'starttls',      // 'starttls' (587) or 'ssl' (465) or '' (none)
         'user'       => 'user@example.com',
         'pass'       => '',
-        'from_email' => 'feste@fragmichnicht.de',
-        'from_name'  => 'Vereinsfeste',
+        'from_email' => 'events@example.org',
+        'from_name'  => 'Club events',
         'timeout'    => 15,
         'verify_tls' => true,            // verify the SMTP server certificate
     ],
