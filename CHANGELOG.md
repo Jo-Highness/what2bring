@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Docker image now based on `php:8.5-apache` (was 8.3); CI also tests PHP 8.5.
+- CI: `actions/checkout` v7, `hadolint/hadolint-action` v3.5.0.
+
 ## [1.6.0] - 2026-10-16
 
 First release with a changelog; follows v1.5.0 (tags v1.0.0–v1.5.0 predate this file).
