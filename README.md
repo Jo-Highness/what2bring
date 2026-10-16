@@ -3,7 +3,7 @@
 **English** · [Deutsch (Handbuch)](docs/HANDBUCH.md) · [Handbook](docs/HANDBOOK.md) · [Changelog](CHANGELOG.md)
 
 [![CI](https://github.com/Jo-Highness/what2bring/actions/workflows/ci.yml/badge.svg)](https://github.com/Jo-Highness/what2bring/actions/workflows/ci.yml)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.6.0-blue)
 ![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)
 ![License](https://img.shields.io/badge/license-MIT-green)
 

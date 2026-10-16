@@ -14,8 +14,8 @@ body:
     id: version
     attributes:
       label: What2Bring version
-      description: "See CHANGELOG.md or inc/version.php (e.g. 1.0.0)"
-      placeholder: "1.0.0"
+      description: "See CHANGELOG.md or inc/version.php (e.g. 1.6.0)"
+      placeholder: "1.6.0"
     validations:
       required: true
   - type: dropdown

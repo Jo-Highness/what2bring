@@ -59,7 +59,7 @@ function db_migrate(PDO $pdo): void
     if (!in_array('email_required', $cols('polls'), true)) {
         $pdo->exec('ALTER TABLE polls ADD COLUMN email_required INTEGER NOT NULL DEFAULT 1');
     }
-    // v2 (1.0.0): personal edit tokens for participants.
+    // v2 (1.6.0): personal edit tokens for participants.
     if (!in_array('edit_token_hash', $cols('contributions'), true)) {
         $pdo->exec('ALTER TABLE contributions ADD COLUMN edit_token_hash TEXT');
     }

@@ -213,7 +213,7 @@ return [
     'install.done_cta'   => 'To the login',
     'install.already'    => 'What2Bring is already set up (config.php exists).',
     'install.secure_none'=> 'none',
-    // 1.0.0
+    // 1.6.0
     'form.thing_label'   => 'Item',
     'poll.detail'        => 'Details',
     'poll.editing'       => 'You are editing your own entry. Your changes replace what you entered before.',

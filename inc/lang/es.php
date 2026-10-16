@@ -213,7 +213,7 @@ return [
     'install.done_cta'   => 'Ir al inicio de sesión',
     'install.already'    => 'What2Bring ya está configurado (config.php existe).',
     'install.secure_none'=> 'ninguno',
-    // 1.0.0
+    // 1.6.0
     'form.thing_label'   => 'Cosa',
     'poll.detail'        => 'Detalles',
     'poll.editing'       => 'Estás editando tu propia inscripción. Los cambios sustituyen lo que indicaste antes.',

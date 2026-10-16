@@ -335,7 +335,7 @@ docker compose up -d --build
 **Shared-Hosting / eigener Server:** Backup machen (Abschnitt 16), dann die neuen Dateien hochladen — **außer**
 `config.php` und `data/` (alles andere ersetzen, auch `inc/`, `templates/` und `public/`).
 
-### Upgrade auf 1.0.0
+### Upgrade auf 1.6.0
 - **Admins werden einmalig abgemeldet** (das Session-Cookie wurde umbenannt). Bestehende Einträge bleiben erhalten;
   Teilnehmende können sie aber erst nach einem neuen Eintrag selbst bearbeiten, weil ältere Einträge kein
   Bearbeitungs-Token haben — der Admin kann den alten Eintrag löschen, die Person trägt sich neu ein.

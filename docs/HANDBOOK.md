@@ -333,7 +333,7 @@ docker compose up -d --build
 **Shared hosting / own server:** make a backup (section 16), then upload the new files **except** `config.php` and
 `data/` (replace everything else, including `inc/`, `templates/` and `public/`).
 
-### Upgrading to 1.0.0
+### Upgrading to 1.6.0
 - **Admins are logged out once** (the session cookie was renamed). Participants’ existing entries stay; they can be
   edited by participants only after a new sign-up, because older entries have no edit token — the admin can delete
   and the participant re-enter them.

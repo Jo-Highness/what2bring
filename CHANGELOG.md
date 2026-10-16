@@ -6,9 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-10-16
+## [1.6.0] - 2026-10-16
 
-First versioned release.
+First release with a changelog; follows v1.5.0 (tags v1.0.0–v1.5.0 predate this file).
 
 ### Security
 - **Installer takeover:** the web installer now requires a setup token (printed to the
@@ -61,5 +61,5 @@ First versioned release.
 - Hard-coded German 404 page title.
 - Backup documentation ignored SQLite WAL files.
 
-[Unreleased]: https://github.com/Jo-Highness/what2bring/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/Jo-Highness/what2bring/releases/tag/v1.0.0
+[Unreleased]: https://github.com/Jo-Highness/what2bring/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/Jo-Highness/what2bring/compare/v1.5.0...v1.6.0
