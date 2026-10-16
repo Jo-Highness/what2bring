@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Jo-Highness/what2bring/security/advisories/new
+    about: Please report security issues privately via a GitHub security advisory.
+  - name: Handbook
+    url: https://github.com/Jo-Highness/what2bring/blob/main/docs/HANDBOOK.md
+    about: Installation, Docker, reverse proxy, backup and troubleshooting.

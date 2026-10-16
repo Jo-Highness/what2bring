@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }} — lint & tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.1", "8.2", "8.3", "8.4"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite, mbstring
+          coverage: none
+          ini-values: error_reporting=E_ALL, display_errors=On
+      - name: Lint all PHP files
+        run: find . -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n1 -P4 php -l > /dev/null
+      - name: Security regression tests
+        run: php tests/security_test.php
+      - name: End-to-end HTTP tests
+        run: php tests/http_test.php
+
+  hadolint:
+    name: Dockerfile lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+  shellcheck:
+    name: Shell lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: shellcheck docker/entrypoint.sh
+
+  docker:
+    name: Docker quick start (compose up → installer)
+    runs-on: ubuntu-latest
+    needs: [hadolint, shellcheck]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate compose file
+        run: docker compose config -q
+      - name: Build and start (hardened, read-only)
+        run: docker compose up -d --build --wait --wait-timeout 120
+      - name: Health endpoint
+        run: test "$(curl -fsS http://localhost:8470/index.php?r=health)" = ok
+      - name: Container runs as www-data with a read-only root filesystem
+        run: |
+          test "$(docker compose exec -T what2bring id -u)" = 33
+          if docker compose exec -T what2bring touch /var/www/html/x 2>/dev/null; then
+            echo "root filesystem is writable"; exit 1
+          fi
+      - name: Setup token is printed to the log and required by the installer
+        run: |
+          docker compose logs what2bring > container.log
+          grep -q 'enter this setup token' container.log
+          token=$(docker compose exec -T what2bring cat /data/.setup_token | tr -d '\r\n')
+          test -n "$token"
+          jar=$(mktemp)
+          page=$(curl -fsS -c "$jar" -b "$jar" http://localhost:8470/)
+          grep -q 'name="setup_token"' <<< "$page"
+          csrf=$(sed -n 's/.*name="_csrf" value="\([^"]*\)".*/\1/p' <<< "$page" | head -n1)
+          test -n "$csrf"
+          form=(--data-urlencode "_csrf=$csrf" --data-urlencode "admin_pw=ci-password-123"
+                --data-urlencode "admin_pw2=ci-password-123" --data-urlencode "base_url=http://localhost:8470"
+                --data-urlencode "default_lang=en" --data-urlencode "mail_dry_run=1")
+          code=$(curl -s -o /dev/null -w '%{http_code}' -c "$jar" -b "$jar" "${form[@]}" --data-urlencode "setup_token=wrong" http://localhost:8470/index.php)
+          test "$code" = 403
+          if docker compose exec -T what2bring test -f /data/config.php; then
+            echo "config written despite wrong token"; exit 1
+          fi
+          curl -fsS -c "$jar" -b "$jar" "${form[@]}" --data-urlencode "setup_token=$token" http://localhost:8470/index.php > /dev/null
+          docker compose exec -T what2bring test -f /data/config.php
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8470/)" = 302
+      - name: Backup CLI works in the container
+        run: |
+          curl -fsS -o /dev/null http://localhost:8470/index.php?r=admin.login
+          docker compose exec -T what2bring php bin/backup.php /data/backups/ci.sqlite
+      - name: Logs
+        if: always()
+        run: docker compose logs
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
