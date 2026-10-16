@@ -1,7 +1,7 @@
 # Requirements — What2Bring (Clean-Room)
 
 > Code-unabhaengiges Anforderungsdokument (WAS/WARUM). Ziel: die App laesst sich allein
-> hieraus als Greenfield neu bauen. Produktname What2Bring, Betriebsdomain fragmichnicht.de.
+> hieraus als Greenfield neu bauen. Produktname What2Bring.
 > Nutzer-Dokumentation (Bedienung mit Screenshots): [HANDBUCH.md](HANDBUCH.md) / [HANDBOOK.md](HANDBOOK.md).
 
 ## 1. Zweck
@@ -29,7 +29,8 @@ E-Mail-Adressen von Gaesten werden niemals oeffentlich sichtbar.
   Eine Abfrage hat mindestens eine Sache.
 - **Rueckmeldung (Contribution):** gehoert zu einer Abfrage; Name (Pflicht), nicht
   rueckrechenbarer E-Mail-Schluessel (HMAC ueber normalisierte Adresse mit geheimem Pepper),
-  Zeitstempel. Pro Abfrage ist der E-Mail-Schluessel eindeutig (Upsert-Schluessel).
+  Zeitstempel, Hash eines persoenlichen Bearbeitungs-Tokens. Pro Abfrage ist der
+  E-Mail-Schluessel eindeutig.
 - **Kontakt (Contact):** E-Mail-Klartext, 1:1 zur Rueckmeldung, in einer GETRENNTEN Entitaet,
   die der oeffentliche Code-Pfad nie liest. Rueckmeldungen ohne E-Mail haben keinen Kontakt.
 - **Rueckmeldungs-Sache:** n:m Rueckmeldung<->Sache mit optionalem Freitext-Detail; pro
@@ -39,18 +40,22 @@ E-Mail-Adressen von Gaesten werden niemals oeffentlich sichtbar.
 
 ## 4. Funktionale Anforderungen
 ### 4.1 Installation und Konfiguration
-- **FR1** Web-Installer beim ersten Aufruf, solange keine Konfigurationsdatei existiert:
-  Admin-Passwort (min. 8 Zeichen, mit Wiederholung), Basis-URL (http/https, vorbelegt aus
-  Request), Standardsprache, optional SMTP (Host/Port/Verschluesselung/User/Passwort/
-  Absender), Trockenlauf-Schalter (Default an). Der Installer erzeugt Passwort-Hash und
-  geheimen Pepper selbst, schreibt die Konfiguration EINE Ebene oberhalb des Docroot und ist
-  danach nicht mehr erreichbar (Selbstsperre). Alternativ manuelle Konfiguration aus Beispiel.
+- **FR1** Web-Installer beim ersten Aufruf, solange keine Konfiguration existiert (weder Datei
+  noch Pflicht-Umgebungsvariablen): Setup-Token (Pflicht; aus `W2B_SETUP_TOKEN` oder beim
+  ersten Aufruf erzeugt, ins Server-/Container-Log geschrieben und in `data/.setup_token`
+  abgelegt), Admin-Passwort (min. 10 Zeichen, mit Wiederholung), Basis-URL (vorbelegt aus
+  Request), Standardsprache, vertrauenswuerdige Proxys, optional SMTP, Trockenlauf-Schalter
+  (Default an). Der Installer erzeugt Passwort-Hash und Pepper selbst, schreibt die
+  Konfiguration nach `W2B_CONFIG` (Default: EINE Ebene oberhalb des Docroot) und ist danach
+  nicht mehr erreichbar (Selbstsperre). Alternativ manuelle Konfiguration aus Beispiel oder
+  vollstaendig per Umgebungsvariablen (`W2B_*`).
 - **FR2** Datenbank (SQLite-Datei ausserhalb des Docroot) wird beim ersten Zugriff automatisch
   angelegt; Schema idempotent.
 ### 4.2 Organisator
-- **FR3** Login nur per Passwort (Hash-Vergleich); Logout; wiederholte Fehlversuche werden
-  gedrosselt (ab 5 Fehlern ansteigende Sperre, max. 5 Minuten); Session-ID wird beim Login
-  erneuert.
+- **FR3** Login nur per Passwort (Hash-Vergleich); Logout; Fehlversuche werden in der DB
+  gezaehlt (sessionunabhaengig): pro IP ab 5 Fehlern in 15 min exponentielle Sperre (max.
+  15 min), pro Konto ab 50 Fehlern in 15 min 60 s Verzoegerung; Session-ID wird beim Login
+  erneuert; Abmeldung nach Inaktivitaet (Default 30 min).
 - **FR4** Uebersicht aller Abfragen (neueste zuerst) mit Anzahl Sachen und Rueckmeldungen.
 - **FR5** Abfrage anlegen/bearbeiten: Ueberschrift (Pflicht), Beschreibung, Datum, Sichtbarkeit,
   E-Mail-Pflicht, dynamische Liste von Sachen (hinzufuegen/umbenennen/entfernen, Reihenfolge
@@ -60,7 +65,8 @@ E-Mail-Adressen von Gaesten werden niemals oeffentlich sichtbar.
 - **FR6** Abfrage-Detailansicht: Share-Link (kopierbar), alle Rueckmeldungen mit Name, E-Mail,
   gewaehlten Sachen + Details, Zeitpunkt; Zusammenfassung pro Sache.
 - **FR7** Share-Link rotieren: neues Token erzeugen; der alte Link liefert sofort 404.
-- **FR8** Abfrage loeschen (mit Bestaetigung, POST + CSRF).
+- **FR8** Abfrage loeschen (mit Bestaetigung, POST + CSRF); einzelne Rueckmeldung loeschen
+  (Betroffenenanfragen); optional automatische Loeschung N Tage nach dem Datum.
 - **FR9** CSV-Export der Rueckmeldungen (Semikolon-getrennt, UTF-8 mit BOM fuer Excel,
   Spalten Name/E-Mail/Bringt mit/Aktualisiert; Dateiname aus Titel + Datum).
 - **FR10** Erinnerungen: Formular mit Betreff und Text, vorbelegt mit sprachabhaengiger
@@ -76,14 +82,18 @@ E-Mail-Adressen von Gaesten werden niemals oeffentlich sichtbar.
   je Abfrage). Unbekanntes/rotiertes Token -> 404-Seite ohne Informationspreisgabe.
 - **FR13** Validierung: Name nicht leer; mindestens eine Sache; E-Mail gueltig, wenn Pflicht
   oder angegeben. Fehler als Meldungen, Eingaben bleiben erhalten.
-- **FR14** Upsert-Logik: erneutes Absenden mit derselben E-Mail (Vergleich case-insensitiv,
-  getrimmt) ersetzt die vorherige Auswahl derselben Person vollstaendig (kein Duplikat,
-  Name wird aktualisiert). Ohne E-Mail entsteht immer ein neuer Eintrag. Nur Sachen der
-  jeweiligen Abfrage werden akzeptiert. Speichern atomar.
+- **FR14** Bearbeiten nur mit Berechtigung: jeder neue Eintrag erhaelt ein geheimes
+  Bearbeitungs-Token (Cookie + persoenlicher Link auf der Dankeseite, optional per
+  Bestaetigungsmail). Nur damit laesst sich der Eintrag aendern oder zurueckziehen. Ein
+  Absenden ohne Token mit einer bereits registrierten E-Mail (Vergleich case-insensitiv,
+  getrimmt) wird mit klarer Meldung abgewiesen und aendert nichts. Ohne E-Mail entsteht
+  immer ein neuer Eintrag. Nur Sachen der jeweiligen Abfrage werden akzeptiert;
+  Laengenlimits (Name 100, E-Mail 254, Detail 200 Zeichen) und Rate-Limit pro IP. Speichern
+  atomar.
 - **FR15** "Wer ist dabei"-Bereich gemaess Sichtbarkeit: `who_and_what` = Namen je Sache inkl.
   Details; `names_only` = nur alphabetische Namensliste; `none` = nichts. E-Mail nie.
-- **FR16** Dankeseite nach dem Absenden (Name aus Session, einmalig), mit Hinweis, dass die
-  Angabe per erneutem Eintrag mit gleicher E-Mail anpassbar ist, und Link zurueck.
+- **FR16** Dankeseite nach dem Absenden (Name aus Session, einmalig), mit persoenlichem
+  Bearbeitungs-Link und Link zurueck.
 - **FR17** Impressum und Datenschutz frei erreichbar (ohne Login/Token).
 ### 4.4 Sprachen
 - **FR18** UI dreisprachig DE/EN/ES inkl. Mail- und Rechtstext-Vorlagen. Sprachwahl: URL-
@@ -91,23 +101,26 @@ E-Mail-Adressen von Gaesten werden niemals oeffentlich sichtbar.
   Fusszeile erhaelt Route/Query. Fehlende Uebersetzung faellt auf Deutsch zurueck.
 
 ## 5. Nicht-funktionale Anforderungen
-- **NFR1 (Hosting)** PHP >= 8.0 mit pdo_sqlite, sonst nichts: kein Composer, keine externen
+- **NFR1 (Hosting)** PHP >= 8.1 mit pdo_sqlite, sonst nichts: kein Composer, keine externen
   Bibliotheken, kein Build, kein mod_rewrite (query-basiertes Routing `index.php?r=...`),
-  kein Cron. Alles Sensible (Konfig, DB, Includes, Templates) liegt oberhalb des Docroot;
+  kein Cron (optional fuer Auto-Loeschung/Backup). Alles Sensible (Konfig, DB, Includes, Templates) liegt oberhalb des Docroot;
   Fallback-.htaccess sperrt diese Pfade, falls der Docroot nicht auf `public/` zeigen kann.
 - **NFR2 (Datenschutz)** E-Mail-Klartext strukturell vom oeffentlichen Pfad getrennt; keine
   Tracker, keine externen Assets/CDNs; noindex/nofollow ueberall (Header, Meta, robots.txt);
   Referrer-Policy no-referrer. Rechtstexte sind Entwurf, keine Rechtsberatung.
 - **NFR3 (Sicherheit)** CSRF-Token auf jedem Formular (Admin und Gast), Prepared Statements,
-  HTML-Escaping aller Ausgaben, Security-Header (nosniff, X-Frame-Options DENY), Session-
-  Cookie httponly/samesite/secure bei HTTPS, Mail-Header gegen CR/LF-Injection gehaertet,
+  HTML-Escaping aller Ausgaben, Security-Header (CSP `script-src 'self'` ohne Inline-Skripte,
+  HSTS bei HTTPS, nosniff, X-Frame-Options DENY), Session-Cookie httponly/samesite/secure bei
+  HTTPS mit Strict Mode, X-Forwarded-* nur von konfigurierten Proxys, Installer nur mit
+  Setup-Token, Mail-Header gegen CR/LF-Injection gehaertet,
   TLS-Zertifikat des SMTP-Servers wird geprueft. Secrets nur in der Konfigurationsdatei
   (nicht im Repo, nicht ueber HTTP erreichbar).
 - **NFR4 (Bedienbarkeit)** Mobile-first, responsiv, grosse Touch-Ziele; Gastformular in unter
   einer Minute ausfuellbar; Flash-Meldungen fuer Erfolg/Fehler.
-- **NFR5 (Betrieb)** Zustand ist eine einzige SQLite-Datei + optionales Mail-Log; Backup =
-  Dateikopie; kein eingebautes Backup. Trockenlauf-Modus schreibt Mails in ein Log statt zu
-  senden. Docker-Testcontainer (php:apache) mit Healthcheck als Entwicklungs-/Testumgebung.
+- **NFR5 (Betrieb)** Zustand ist eine SQLite-Datei (WAL) + optionales Mail-Log; Backup per
+  `bin/backup.php` (konsistenter Snapshot) oder `sqlite3 .backup`. Trockenlauf-Modus schreibt
+  Mails (Empfaenger standardmaessig maskiert) in ein Log statt zu senden. Docker-Image
+  (php:apache, nicht-root, Port 8080, read-only-faehig) mit Healthcheck.
 - **NFR6 (Lizenz)** MIT.
 
 ## 6. Schnittstellen
@@ -121,19 +134,20 @@ E-Mail-Adressen von Gaesten werden niemals oeffentlich sichtbar.
 - **Export:** CSV-Download (siehe FR9).
 
 ## 7. Akzeptanzkriterien
-- **AC1** Frischer Upload ohne Konfig zeigt den Installer; nach Abschluss ist der Installer
-  nicht mehr aufrufbar, Login funktioniert, DB wird automatisch angelegt.
+- **AC1** Frischer Upload ohne Konfig zeigt den Installer; ohne gueltiges Setup-Token wird
+  nichts geschrieben; nach Abschluss ist der Installer nicht mehr aufrufbar, Login funktioniert, DB wird automatisch angelegt.
 - **AC2** Organisator legt Abfrage mit 3 Sachen an; Share-Link oeffnet die Gastseite ohne
   Login; Entfernen einer Sache im Admin entfernt sie auch aus Gast-Ansicht und Rueckmeldungen.
-- **AC3** Gast sendet zweimal mit derselben E-Mail (verschiedene Schreibweise/Gross-Klein):
-  genau ein Eintrag mit der letzten Auswahl. Zwei Gaeste ohne E-Mail: zwei Eintraege.
+- **AC3** Gast aendert seinen Eintrag ueber den persoenlichen Link: genau ein Eintrag mit der
+  letzten Auswahl. Ein Dritter sendet ohne Token mit derselben E-Mail (andere Schreibweise):
+  abgewiesen, Eintrag unveraendert. Zwei Gaeste ohne E-Mail: zwei Eintraege.
 - **AC4** Bei allen drei Sichtbarkeitsstufen erscheint auf keiner oeffentlichen Seite und in
   keinem oeffentlichen HTML-Quelltext eine E-Mail-Adresse.
 - **AC5** Link-Rotation: alter Link -> 404, neuer Link -> Gastseite; Rueckmeldungen bleiben.
 - **AC6** Erinnerung an Abfrage mit 2 Gaesten mit E-Mail und 1 ohne: genau 2 Mails, je ein
   Empfaenger, Platzhalter korrekt ersetzt; im Trockenlauf landen sie im Mail-Log.
 - **AC7** POST ohne/mit falschem CSRF-Token wird abgewiesen; 5+ falsche Passwoerter fuehren
-  zur zeitlichen Sperre; direkter HTTP-Zugriff auf Konfig, DB, Includes liefert 403/404.
+  zur zeitlichen Sperre, auch mit neuer Session; direkter HTTP-Zugriff auf Konfig, DB, Includes liefert 403/404.
 - **AC8** CSV-Export oeffnet in Excel mit korrekten Umlauten und allen Rueckmeldungen.
 - **AC9** Umschalten auf EN/ES uebersetzt UI, Mail-Vorlage und Rechtstext-Vorlage.
 
