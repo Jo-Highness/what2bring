@@ -2,92 +2,105 @@
 declare(strict_types=1);
 
 /**
- * Web installer — runs ONLY when config.php does not exist yet (dispatched from
- * public/index.php). Collects the essentials, generates the pepper + password
- * hash, and writes config.php one level above the document root. Once config.php
- * exists this file is never reached again, so the installer self-locks.
+ * Web installer — runs ONLY while the app is not configured (no config file and no
+ * W2B_ADMIN_PASSWORD_HASH/W2B_APP_PEPPER in the environment); dispatched from
+ * public/index.php. Requires the setup token (see inc/setup.php) so nobody else can
+ * claim a fresh installation. Writes the config file to W2B_CONFIG (default:
+ * config.php one level above the document root) and locks itself afterwards.
  */
 
-require __DIR__ . '/helpers.php';
-require __DIR__ . '/i18n.php';
-require __DIR__ . '/csrf.php';
+require_once __DIR__ . '/app.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_name('w2b_install');
-    session_start();
-}
-header('X-Robots-Tag: noindex, nofollow');
-header('Referrer-Policy: no-referrer');
+$https = request_is_https();
+start_secure_session('w2b_install', $https, 'Strict');
+send_security_headers($https);
+header('Cache-Control: no-store');
 
-$cfgFile = dirname(__DIR__) . '/config.php';
+$cfgFile = w2b_config_file();
 $errors = [];
 $done = false;
+$localBypass = setup_local_bypass();
+$expectedToken = $localBypass ? '' : setup_ensure_token();
+$tokenUnavailable = !$localBypass && $expectedToken === null;
+$givenToken = trim((string) ($_POST['setup_token'] ?? ($_GET['setup_token'] ?? '')));
+$fwdHttps = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
 $vals = [
-    'base_url'   => rtrim((string) (($_SERVER['HTTPS'] ?? '') && ($_SERVER['HTTPS'] !== 'off') ? 'https' : 'http')
-                    . '://' . (string) ($_SERVER['HTTP_HOST'] ?? 'localhost'), '/'),
+    // Prefill only — the admin confirms/edits the base URL in the form.
+    'base_url'   => (($https || $fwdHttps) ? 'https' : 'http') . '://'
+                    . preg_replace('/[^A-Za-z0-9.:\-\[\]]/', '', (string) ($_SERVER['HTTP_HOST'] ?? 'localhost')),
     'smtp_host'  => '', 'smtp_port' => 587, 'smtp_secure' => 'starttls',
     'smtp_user'  => '', 'smtp_from' => '', 'smtp_from_name' => '', 'dry_run' => true,
+    'trusted_proxies' => '',
 ];
-
-/** Escape a value for a single-quoted PHP string literal. */
-function w2b_php_str(string $v): string
-{
-    return "'" . addcslashes($v, "\\'") . "'";
-}
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     csrf_check();
+    if ($tokenUnavailable) {
+        $errors[] = t('install.err_token_unavailable', ['path' => setup_token_file()]);
+    } elseif (!$localBypass && !setup_token_valid($givenToken)) {
+        http_response_code(403);
+        $errors[] = t('install.err_token');
+    }
     $pw  = (string) ($_POST['admin_pw'] ?? '');
     $pw2 = (string) ($_POST['admin_pw2'] ?? '');
-    $vals['base_url']       = rtrim(trim((string) ($_POST['base_url'] ?? '')), '/');
-    $lang = (string) ($_POST['default_lang'] ?? 'de');
+    $vals['base_url']       = rtrim(post_str($_POST, 'base_url'), '/');
+    $lang = post_str($_POST, 'default_lang');
     $lang = isset(available_langs()[$lang]) ? $lang : 'de';
-    $vals['smtp_host']      = trim((string) ($_POST['smtp_host'] ?? ''));
-    $vals['smtp_port']      = (int) ($_POST['smtp_port'] ?? 587) ?: 587;
-    $vals['smtp_secure']    = in_array($_POST['smtp_secure'] ?? 'starttls', ['starttls', 'ssl', ''], true) ? (string) $_POST['smtp_secure'] : 'starttls';
-    $vals['smtp_user']      = trim((string) ($_POST['smtp_user'] ?? ''));
-    $smtpPass               = (string) ($_POST['smtp_pass'] ?? '');
-    $vals['smtp_from']      = trim((string) ($_POST['smtp_from'] ?? ''));
-    $vals['smtp_from_name'] = trim((string) ($_POST['smtp_from_name'] ?? ''));
+    $vals['smtp_host']      = post_str($_POST, 'smtp_host');
+    $vals['smtp_port']      = (int) post_str($_POST, 'smtp_port') ?: 587;
+    $secure                 = post_str($_POST, 'smtp_secure');
+    $vals['smtp_secure']    = in_array($secure, ['starttls', 'ssl', ''], true) ? $secure : 'starttls';
+    $vals['smtp_user']      = post_str($_POST, 'smtp_user');
+    $smtpPass               = is_string($_POST['smtp_pass'] ?? null) ? $_POST['smtp_pass'] : '';
+    $vals['smtp_from']      = post_str($_POST, 'smtp_from');
+    $vals['smtp_from_name'] = post_str($_POST, 'smtp_from_name');
     $vals['dry_run']        = isset($_POST['mail_dry_run']);
+    $vals['trusted_proxies'] = post_str($_POST, 'trusted_proxies');
+    $proxies = array_values(array_filter(array_map('trim', explode(',', $vals['trusted_proxies'])), 'strlen'));
 
-    if (strlen($pw) < 8) {
-        $errors[] = t('install.err_pw_short');
-    }
-    if ($pw !== $pw2) {
-        $errors[] = t('install.err_pw_match');
-    }
-    if (!preg_match('#^https?://#i', $vals['base_url'])) {
-        $errors[] = t('install.err_base_url');
+    if (!$errors) {
+        if (strlen($pw) < 10) {
+            $errors[] = t('install.err_pw_short');
+        }
+        if ($pw !== $pw2) {
+            $errors[] = t('install.err_pw_match');
+        }
+        if (!preg_match('#^https?://[^\s/]+(/[^\s]*)?$#i', $vals['base_url'])) {
+            $errors[] = t('install.err_base_url');
+        }
+        foreach ($proxies as $p) {
+            $ipPart = explode('/', $p, 2)[0];
+            if (@inet_pton($ipPart) === false) {
+                $errors[] = t('install.err_proxy', ['value' => $p]);
+                break;
+            }
+        }
     }
 
     if (!$errors) {
-        $hash   = password_hash($pw, PASSWORD_DEFAULT);
-        $pepper = bin2hex(random_bytes(32));
-        $c = "<?php\n// What2Bring configuration — generated by the web installer. Keep private, do not commit.\n"
-            . "return [\n"
-            . '    ' . w2b_php_str('admin_password_hash') . ' => ' . w2b_php_str($hash) . ",\n"
-            . '    ' . w2b_php_str('app_pepper') . ' => ' . w2b_php_str($pepper) . ",\n"
-            . '    ' . w2b_php_str('base_url') . ' => ' . w2b_php_str($vals['base_url']) . ",\n"
-            . '    ' . w2b_php_str('default_lang') . ' => ' . w2b_php_str($lang) . ",\n"
-            . '    ' . w2b_php_str('db_file') . " => __DIR__ . '/data/what2bring.sqlite',\n"
-            . '    ' . w2b_php_str('mail_dry_run') . ' => ' . ($vals['dry_run'] ? 'true' : 'false') . ",\n"
-            . '    ' . w2b_php_str('smtp') . " => [\n"
-            . '        ' . w2b_php_str('host') . ' => ' . w2b_php_str($vals['smtp_host']) . ",\n"
-            . '        ' . w2b_php_str('port') . ' => ' . (int) $vals['smtp_port'] . ",\n"
-            . '        ' . w2b_php_str('secure') . ' => ' . w2b_php_str($vals['smtp_secure']) . ",\n"
-            . '        ' . w2b_php_str('user') . ' => ' . w2b_php_str($vals['smtp_user']) . ",\n"
-            . '        ' . w2b_php_str('pass') . ' => ' . w2b_php_str($smtpPass) . ",\n"
-            . '        ' . w2b_php_str('from_email') . ' => ' . w2b_php_str($vals['smtp_from']) . ",\n"
-            . '        ' . w2b_php_str('from_name') . ' => ' . w2b_php_str($vals['smtp_from_name']) . ",\n"
-            . '        ' . w2b_php_str('timeout') . " => 15,\n"
-            . '        ' . w2b_php_str('verify_tls') . " => true,\n"
-            . "    ],\n];\n";
+        $c = setup_render_config([
+            'hash'            => password_hash($pw, PASSWORD_DEFAULT),
+            'pepper'          => bin2hex(random_bytes(32)),
+            'base_url'        => $vals['base_url'],
+            'lang'            => $lang,
+            'dry_run'         => $vals['dry_run'],
+            'trusted_proxies' => $proxies,
+            'smtp'            => [
+                'host' => $vals['smtp_host'], 'port' => $vals['smtp_port'], 'secure' => $vals['smtp_secure'],
+                'user' => $vals['smtp_user'], 'pass' => $smtpPass, 'from_email' => $vals['smtp_from'],
+                'from_name' => $vals['smtp_from_name'],
+            ],
+        ], $cfgFile);
 
-        if (@file_put_contents($cfgFile, $c) === false) {
+        $old = umask(0027);
+        $written = @file_put_contents($cfgFile, $c, LOCK_EX);
+        umask($old);
+        if ($written === false) {
             $errors[] = t('install.err_write', ['path' => $cfgFile]);
         } else {
             @chmod($cfgFile, 0640);
+            setup_finish();
+            $_SESSION = [];
             $done = true;
         }
     }
@@ -128,17 +141,27 @@ $secureOpts = ['starttls' => 'STARTTLS (587)', 'ssl' => 'SSL/TLS (465)', '' => t
         <p class="eyebrow"><?= e(t('install.eyebrow')) ?></p>
         <h1><?= e(t('install.title')) ?></h1>
         <p class="muted"><?= e(t('install.intro')) ?></p>
+        <?php if ($tokenUnavailable): ?>
+            <div class="flash flash--error"><?= e(t('install.err_token_unavailable', ['path' => setup_token_file()])) ?></div>
+        <?php endif; ?>
 
         <?php foreach ($errors as $er): ?>
             <div class="flash flash--error"><?= e($er) ?></div>
         <?php endforeach; ?>
 
-        <form method="post" action="index.php">
+        <form method="post" action="index.php" autocomplete="off">
             <?= csrf_field() ?>
             <div class="card stack">
+                <?php if (!$localBypass): ?>
+                <div class="field">
+                    <label for="setup_token"><?= e(t('install.token')) ?> *</label>
+                    <input type="text" id="setup_token" name="setup_token" value="<?= e($givenToken) ?>" autocomplete="off" spellcheck="false" maxlength="128" required>
+                    <p class="hint"><?= e(t('install.token_hint', ['path' => setup_token_file()])) ?></p>
+                </div>
+                <?php endif; ?>
                 <div class="field">
                     <label for="admin_pw"><?= e(t('install.admin_pw')) ?> *</label>
-                    <input type="password" id="admin_pw" name="admin_pw" autocomplete="new-password" required>
+                    <input type="password" id="admin_pw" name="admin_pw" autocomplete="new-password" minlength="10" maxlength="1024" required>
                     <p class="hint"><?= e(t('install.admin_pw_hint')) ?></p>
                 </div>
                 <div class="field">
@@ -147,8 +170,13 @@ $secureOpts = ['starttls' => 'STARTTLS (587)', 'ssl' => 'SSL/TLS (465)', '' => t
                 </div>
                 <div class="field">
                     <label for="base_url"><?= e(t('install.base_url')) ?> *</label>
-                    <input type="text" id="base_url" name="base_url" value="<?= e($vals['base_url']) ?>" required>
+                    <input type="text" id="base_url" name="base_url" value="<?= e($vals['base_url']) ?>" maxlength="500" required>
                     <p class="hint"><?= e(t('install.base_url_hint')) ?></p>
+                </div>
+                <div class="field">
+                    <label for="trusted_proxies"><?= e(t('install.proxies')) ?></label>
+                    <input type="text" id="trusted_proxies" name="trusted_proxies" value="<?= e($vals['trusted_proxies']) ?>" placeholder="172.16.0.0/12" maxlength="500">
+                    <p class="hint"><?= e(t('install.proxies_hint')) ?></p>
                 </div>
                 <div class="field" style="margin-bottom:0;">
                     <label for="default_lang"><?= e(t('install.lang')) ?></label>
