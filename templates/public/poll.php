@@ -1,7 +1,11 @@
 <?php
-/** @var array $poll; @var array $items; @var array $summary; @var array $names */
+/** @var array $poll; @var array|null $own; @var array $items; @var array $summary; @var array $names */
 $token = $poll['token'];
 $emailReq = (int) ($poll['email_required'] ?? 1);
+$own = $own ?? null;
+$sel = $own['selections'] ?? [];
+$vName = (string) old('name', $own['name'] ?? '');
+$vEmail = (string) old('email', $own['email'] ?? '');
 ?>
 <div class="card card--pad-lg">
     <p class="eyebrow"><?= e(t('poll.eyebrow')) ?></p>
@@ -14,6 +18,10 @@ $emailReq = (int) ($poll['email_required'] ?? 1);
     <?php endif; ?>
 </div>
 
+<?php if ($own !== null): ?>
+    <div class="flash flash--info"><?= e(t('poll.editing')) ?></div>
+<?php endif; ?>
+
 <?php if (!$items): ?>
     <div class="card"><p class="muted" style="margin:0;"><?= e(t('poll.no_things')) ?></p></div>
 <?php else: ?>
@@ -25,13 +33,14 @@ $emailReq = (int) ($poll['email_required'] ?? 1);
         <p class="hint" style="margin-bottom:14px;"><?= e(t('poll.choose_hint')) ?></p>
         <ul class="bring">
             <?php foreach ($items as $it): $iid = (int) $it['id']; ?>
-                <li class="bring__item" data-checked="0">
+                <?php $isSel = array_key_exists($iid, $sel); ?>
+                <li class="bring__item" data-checked="<?= $isSel ? '1' : '0' ?>">
                     <div class="bring__top">
-                        <input type="checkbox" id="item<?= $iid ?>" name="items[<?= $iid ?>]" value="1">
+                        <input type="checkbox" id="item<?= $iid ?>" name="items[<?= $iid ?>]" value="1" <?= $isSel ? 'checked' : '' ?>>
                         <label for="item<?= $iid ?>"><?= e($it['label']) ?></label>
                     </div>
-                    <div class="bring__detail" hidden>
-                        <input type="text" name="detail[<?= $iid ?>]" placeholder="<?= e(t('poll.detail_ph')) ?>">
+                    <div class="bring__detail" <?= $isSel ? '' : 'hidden' ?>>
+                        <input type="text" name="detail[<?= $iid ?>]" value="<?= e($sel[$iid] ?? '') ?>" maxlength="<?= LIMIT_DETAIL ?>" placeholder="<?= e(t('poll.detail_ph')) ?>" aria-label="<?= e(t('poll.detail')) ?>">
                     </div>
                 </li>
             <?php endforeach; ?>
@@ -42,18 +51,26 @@ $emailReq = (int) ($poll['email_required'] ?? 1);
         <h2><?= e(t('poll.your_data')) ?></h2>
         <div class="field">
             <label for="name"><?= e(t('poll.name')) ?> *</label>
-            <input type="text" id="name" name="name" value="<?= e((string) old('name')) ?>" autocomplete="name" required>
+            <input type="text" id="name" name="name" value="<?= e($vName) ?>" autocomplete="name" maxlength="<?= LIMIT_NAME ?>" required>
         </div>
         <div class="field">
             <label for="email"><?= e(t('poll.email')) ?> <?= $emailReq ? '*' : '<span class="muted" style="font-weight:400;">' . e(t('poll.optional')) . '</span>' ?></label>
-            <input type="email" id="email" name="email" value="<?= e((string) old('email')) ?>" autocomplete="email" <?= $emailReq ? 'required' : '' ?>>
+            <input type="email" id="email" name="email" value="<?= e($vEmail) ?>" autocomplete="email" maxlength="<?= LIMIT_EMAIL ?>" <?= $emailReq ? 'required' : '' ?>>
             <p class="hint"><?= $emailReq ? e(t('poll.email_hint_required')) : e(t('poll.email_hint_optional')) ?></p>
         </div>
         <div class="btn-row">
-            <button type="submit" class="btn btn--lg"><?= e(t('poll.submit')) ?></button>
+            <button type="submit" class="btn btn--lg"><?= e(t($own !== null ? 'poll.save' : 'poll.submit')) ?></button>
         </div>
     </div>
 </form>
+<?php if ($own !== null): ?>
+    <form method="post" class="card" action="<?= e(base_url()) ?>/index.php?<?= e(http_build_query(['r' => 'poll_submit', 'token' => $token])) ?>" data-confirm="<?= e(t('poll.withdraw_confirm')) ?>">
+        <?= csrf_field() ?>
+        <input type="hidden" name="withdraw" value="1">
+        <p class="hint"><?= e(t('poll.withdraw_hint')) ?></p>
+        <button type="submit" class="btn btn--danger"><?= e(t('poll.withdraw')) ?></button>
+    </form>
+<?php endif; ?>
 <?php endif; ?>
 
 <?php if ($poll['visibility'] === 'who_and_what' && $items): ?>
@@ -84,18 +101,3 @@ $emailReq = (int) ($poll['email_required'] ?? 1);
         </div>
     </div>
 <?php endif; ?>
-
-<script>
-(function () {
-    document.querySelectorAll('.bring__item').forEach(function (li) {
-        var cb = li.querySelector('input[type=checkbox]');
-        var detail = li.querySelector('.bring__detail');
-        var sync = function () {
-            li.setAttribute('data-checked', cb.checked ? '1' : '0');
-            detail.hidden = !cb.checked;
-        };
-        cb.addEventListener('change', sync);
-        sync();
-    });
-})();
-</script>
