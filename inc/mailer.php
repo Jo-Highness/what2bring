@@ -42,9 +42,26 @@ function mail_clean_addr(string $addr): string
     return str_replace(["\r", "\n", "\0"], '', trim($addr));
 }
 
+/** Mask an address for logs: "anna.muster@example.org" -> "a***@example.org". */
+function mail_redact_addr(string $addr): string
+{
+    $at = strrpos($addr, '@');
+    if ($at === false || $at === 0) {
+        return '***';
+    }
+    return mb_substr($addr, 0, 1) . '***' . substr($addr, $at);
+}
+
+/** Location of the dry-run mail log (next to the database). */
+function mail_log_file(): string
+{
+    return dirname((string) cfg('db_file')) . '/mail.log';
+}
+
 /**
- * Send a single mail. $cfg is the ['smtp'=>...] sub-array; if cfg('mail_dry_run')
- * is true, the message is appended to data/mail.log instead of being sent.
+ * Send a single mail via SMTP. If cfg('mail_dry_run') is true, nothing is sent;
+ * depending on cfg('mail_log') the message is appended to the mail log in full,
+ * with the recipient address masked ('redacted', default) or not at all ('off').
  */
 function send_mail(string $to_email, string $to_name, string $subject, string $body): bool
 {
@@ -69,12 +86,20 @@ function send_mail(string $to_email, string $to_name, string $subject, string $b
     $message = implode("\r\n", $headers) . "\r\n\r\n" . $body . "\r\n";
 
     if (cfg('mail_dry_run')) {
-        $log = dirname(__DIR__) . '/data/mail.log';
-        @file_put_contents(
-            $log,
-            "=== " . date('c') . " DRY-RUN ===\r\n" . $message . "\r\n\r\n",
-            FILE_APPEND
-        );
+        $mode = (string) cfg('mail_log', 'redacted');
+        if ($mode === 'off') {
+            return true;
+        }
+        $logged = $message;
+        if ($mode !== 'full') {
+            $logged = str_replace('<' . $to_email . '>', '<' . mail_redact_addr($to_email) . '>', $logged);
+        }
+        $file = mail_log_file();
+        $fresh = !is_file($file);
+        @file_put_contents($file, "=== " . date('c') . " DRY-RUN ===\r\n" . $logged . "\r\n\r\n", FILE_APPEND | LOCK_EX);
+        if ($fresh) {
+            @chmod($file, 0640);
+        }
         return true;
     }
 

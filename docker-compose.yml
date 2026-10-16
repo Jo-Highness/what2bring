@@ -1,21 +1,58 @@
+# What2Bring — docker compose up -d --build, then open http://localhost:8470
+# and enter the setup token shown by:  docker compose logs what2bring
+#
+# For production put an HTTPS reverse proxy in front (see docs/HANDBOOK.md,
+# "Reverse proxy & HTTPS") and set W2B_TRUSTED_PROXIES accordingly.
 services:
-  web:
+  what2bring:
     build: .
     image: what2bring:local
     container_name: what2bring
     restart: unless-stopped
     ports:
-      # host:container — test site on docker02, plain HTTP (not behind the mTLS proxy)
-      - "8470:80"
+      # host:container — bind to 127.0.0.1 only when a reverse proxy on the same host serves HTTPS:
+      #   - "127.0.0.1:8470:8080"
+      - "8470:8080"
+    environment:
+      # Optional: choose the installer's setup token yourself instead of reading it from the log.
+      # W2B_SETUP_TOKEN: "change-me-long-random-string"
+      # Reverse proxy networks allowed to set X-Forwarded-For/-Proto (IPs or CIDRs, comma-separated).
+      # W2B_TRUSTED_PROXIES: "172.16.0.0/12"
+      # Data minimisation: delete polls N days after their date (0 = off).
+      # W2B_PURGE_AFTER_DAYS: "90"
+      #
+      # Alternative to the web installer: configure everything here (no config.php needed).
+      # Note: escape "$" in the password hash as "$$" in this file.
+      # W2B_ADMIN_PASSWORD_HASH: "$$2y$$10$$..."
+      # W2B_APP_PEPPER_FILE: /run/secrets/w2b_pepper
+      # W2B_BASE_URL: "https://events.example.org"
+      # W2B_MAIL_DRY_RUN: "false"
+      # W2B_SMTP_HOST: "smtp.example.com"
+      # W2B_SMTP_USER: "events@example.org"
+      # W2B_SMTP_PASS_FILE: /run/secrets/w2b_smtp_pass
+      # W2B_SMTP_FROM_EMAIL: "events@example.org"
+      TZ: "Europe/Berlin"
     volumes:
-      # persist the SQLite DB + mail.log on the host
-      - ./data:/var/www/html/data
-      # runtime config with real admin hash + SMTP (kept out of git)
-      - ./config.php:/var/www/html/config.php:ro
+      # SQLite DB, config.php (written by the installer), mail log.
+      - w2b-data:/data
+      # Bind mount instead? Then run once:  sudo chown -R 33:33 ./data
+      # - ./data:/data
+    # Hardening
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     mem_limit: 256m
+    pids_limit: 200
     healthcheck:
-      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/index.php?r=admin.login')!==false?0:1);"]
+      test: ["CMD", "php", "-r", "exit(trim((string) @file_get_contents('http://127.0.0.1:8080/index.php?r=health')) === 'ok' ? 0 : 1);"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
+
+volumes:
+  w2b-data:

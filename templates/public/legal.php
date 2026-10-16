@@ -7,5 +7,5 @@
     <?php else: ?>
         <p class="muted"><?= e(t('legal.public_empty')) ?></p>
     <?php endif; ?>
-    <p><a class="btn btn--ghost" href="#" onclick="history.back();return false;"><?= e(t('legal.back_link')) ?></a></p>
+    <p><a class="btn btn--ghost" href="<?= e(url('home')) ?>" data-history-back><?= e(t('legal.back_link')) ?></a></p>
 </div>

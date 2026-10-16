@@ -26,12 +26,12 @@ $link = poll_link($poll['token']);
     <h2><?= e(t('view.link_title')) ?></h2>
     <p class="hint"><?= e(t('view.link_hint')) ?></p>
     <div class="linkbox">
-        <input type="text" id="shareLink" value="<?= e($link) ?>" readonly onclick="this.select()">
-        <button type="button" class="btn" id="copyBtn" data-link="<?= e($link) ?>" data-copied="<?= e(t('view.copied')) ?>"><?= e(t('view.copy')) ?></button>
+        <input type="text" id="shareLink" value="<?= e($link) ?>" readonly data-select-on-click>
+        <button type="button" class="btn" data-copy-target="shareLink" data-copied="<?= e(t('view.copied')) ?>"><?= e(t('view.copy')) ?></button>
         <a class="btn btn--ghost" href="<?= e($link) ?>" target="_blank" rel="noopener"><?= e(t('view.view')) ?> ↗</a>
     </div>
     <form method="post" action="<?= e(url('admin.poll_regen', ['id' => $poll['id']])) ?>"
-          onsubmit="return confirm('<?= e(t('view.regen_confirm')) ?>');">
+          data-confirm="<?= e(t('view.regen_confirm')) ?>">
         <?= csrf_field() ?>
         <button type="submit" class="linklike" style="color:var(--warn);">↻ <?= e(t('view.regen')) ?></button>
     </form>
@@ -60,7 +60,7 @@ $link = poll_link($poll['token']);
         <div class="table-scroll">
             <table class="data">
                 <thead>
-                    <tr><th><?= e(t('view.col_name')) ?></th><th><?= e(t('view.col_email')) ?></th><th><?= e(t('view.col_brings')) ?></th><th><?= e(t('view.col_updated')) ?></th></tr>
+                    <tr><th><?= e(t('view.col_name')) ?></th><th><?= e(t('view.col_email')) ?></th><th><?= e(t('view.col_brings')) ?></th><th><?= e(t('view.col_updated')) ?></th><th><span class="sr-only"><?= e(t('view.delete_entry')) ?></span></th></tr>
                 </thead>
                 <tbody>
                     <?php foreach ($contributions as $c): ?>
@@ -73,6 +73,14 @@ $link = poll_link($poll['token']);
                                 <?php endforeach; ?>
                             </td>
                             <td class="muted"><?= e(date('d.m.Y H:i', strtotime((string) ($c['updated_at'] ?: $c['created_at'])))) ?></td>
+                            <td>
+                                <form method="post" class="inline" action="<?= e(url('admin.contribution_delete', ['id' => $poll['id']])) ?>"
+                                      data-confirm="<?= e(t('view.delete_entry_confirm', ['name' => $c['name']])) ?>">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="contribution_id" value="<?= (int) $c['id'] ?>">
+                                    <button type="submit" class="linklike" title="<?= e(t('view.delete_entry')) ?>" aria-label="<?= e(t('view.delete_entry')) ?>">✕</button>
+                                </form>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -86,20 +94,8 @@ $link = poll_link($poll['token']);
     <h2><?= e(t('view.delete_title')) ?></h2>
     <p class="hint"><?= e(t('view.delete_hint')) ?></p>
     <form method="post" action="<?= e(url('admin.poll_delete', ['id' => $poll['id']])) ?>"
-          onsubmit="return confirm('<?= e(t('view.delete_confirm')) ?>');">
+          data-confirm="<?= e(t('view.delete_confirm')) ?>">
         <?= csrf_field() ?>
         <button type="submit" class="btn btn--danger"><?= e(t('view.delete')) ?></button>
     </form>
 </div>
-
-<script>
-(function () {
-    var btn = document.getElementById('copyBtn');
-    btn && btn.addEventListener('click', function () {
-        var link = btn.getAttribute('data-link');
-        var done = function () { var o = btn.textContent; btn.textContent = '✓ ' + btn.getAttribute('data-copied'); setTimeout(function(){ btn.textContent = o; }, 1600); };
-        if (navigator.clipboard) { navigator.clipboard.writeText(link).then(done, done); }
-        else { var i = document.getElementById('shareLink'); i.select(); document.execCommand('copy'); done(); }
-    });
-})();
-</script>

@@ -185,3 +185,45 @@ function admin_reminder_recipients(int $pollId): array
     }
     return $out;
 }
+
+/** Delete a single participant entry (e.g. on a GDPR erasure request). */
+function admin_delete_contribution(int $pollId, int $contributionId): bool
+{
+    $st = db()->prepare('DELETE FROM contributions WHERE id = ? AND poll_id = ?');
+    $st->execute([$contributionId, $pollId]);
+    return $st->rowCount() > 0;
+}
+
+/**
+ * Delete polls (incl. all entries and e-mail addresses) whose date — or creation
+ * date if undated — lies more than $days days in the past. Returns the number of
+ * deleted polls. $days <= 0 does nothing.
+ */
+function purge_old_polls(int $days, ?string $today = null): int
+{
+    if ($days <= 0) {
+        return 0;
+    }
+    $today ??= date('Y-m-d');
+    $cutoff = date('Y-m-d', strtotime($today . ' -' . $days . ' days'));
+    $st = db()->prepare("DELETE FROM polls WHERE COALESCE(event_date, date(created_at)) < ?");
+    $st->execute([$cutoff]);
+    return $st->rowCount();
+}
+
+/** Run the configured auto-purge at most once per day (called from the admin area and bin/purge.php). */
+function maybe_auto_purge(): int
+{
+    $days = (int) cfg('purge_after_days', 0);
+    if ($days <= 0) {
+        return 0;
+    }
+    $today = date('Y-m-d');
+    if (get_setting('last_purge') === $today) {
+        return 0;
+    }
+    $n = purge_old_polls($days, $today);
+    set_setting('last_purge', $today);
+    rl_prune();
+    return $n;
+}

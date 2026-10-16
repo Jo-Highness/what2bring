@@ -1,0 +1,8 @@
+# Optional cron jobs for What2Bring (crontab -e of the web server user).
+# Nightly consistent DB backup, keep 14 days:
+15 3 * * *  cd /var/www/what2bring && php bin/backup.php >/dev/null && find data/backups -name 'what2bring-*.sqlite' -mtime +14 -delete
+# Daily auto-purge (only needed if nobody opens the admin dashboard regularly):
+30 3 * * *  cd /var/www/what2bring && php bin/purge.php >/dev/null
+#
+# Docker variant (on the host):
+# 15 3 * * *  docker compose -f /opt/what2bring/docker-compose.yml exec -T what2bring php bin/backup.php

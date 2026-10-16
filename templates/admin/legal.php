@@ -21,11 +21,11 @@
     <div class="card stack">
         <div class="field">
             <label for="impressum"><?= e(t('legal.impressum')) ?></label>
-            <textarea id="impressum" name="impressum" style="min-height:260px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;"><?= e($impressum) ?></textarea>
+            <textarea id="impressum" name="impressum" maxlength="<?= LIMIT_LEGAL_TEXT ?>" style="min-height:260px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;"><?= e($impressum) ?></textarea>
         </div>
         <div class="field">
             <label for="datenschutz"><?= e(t('legal.datenschutz')) ?></label>
-            <textarea id="datenschutz" name="datenschutz" style="min-height:420px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;"><?= e($datenschutz) ?></textarea>
+            <textarea id="datenschutz" name="datenschutz" maxlength="<?= LIMIT_LEGAL_TEXT ?>" style="min-height:420px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;"><?= e($datenschutz) ?></textarea>
         </div>
         <div class="btn-row">
             <button type="submit" class="btn btn--lg"><?= e(t('legal.save')) ?></button>

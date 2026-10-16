@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest an idea or improvement for What2Bring
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! What2Bring is intentionally small
+        (no accounts, no dependencies, runs on shared hosting) — ideas that keep it
+        that way are the easiest to accept.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem would this feature solve for organisers or participants?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How should it work? Mockups or examples are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: The feature does not require collecting additional personal data (or I explained why it is needed).
+          required: false

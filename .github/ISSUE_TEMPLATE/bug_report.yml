@@ -1,0 +1,74 @@
+name: Bug report
+description: Report a problem with What2Bring
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report! Please fill in as much
+        detail as you can — it makes fixing the issue much faster.
+
+        **Security issues:** please do not report them here — use a
+        [private security advisory](https://github.com/Jo-Highness/what2bring/security/advisories/new) instead.
+  - type: input
+    id: version
+    attributes:
+      label: What2Bring version
+      description: "See CHANGELOG.md or inc/version.php (e.g. 1.0.0)"
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: hosting
+    attributes:
+      label: How do you run it?
+      options:
+        - Docker / docker compose
+        - Shared hosting (Apache, e.g. Strato)
+        - Own server with Apache
+        - Own server with nginx + PHP-FPM
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: php
+    attributes:
+      label: PHP version
+      placeholder: "8.3"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include steps to reproduce.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: >-
+        Relevant lines from the PHP/web server error log or `docker compose logs`.
+        Please remove e-mail addresses, tokens and other personal data.
+      render: shell
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I am running the latest version of What2Bring.
+          required: true
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+        - label: I removed personal data (e-mail addresses, tokens, passwords) from this report.
+          required: true

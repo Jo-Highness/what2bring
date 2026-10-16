@@ -1,0 +1,13 @@
+# /etc/logrotate.d/what2bring — rotate the dry-run mail log (contains personal data).
+# Adjust the path to your data directory (Docker named volume: see `docker volume inspect`).
+/var/www/what2bring/data/mail.log {
+    weekly
+    rotate 4
+    maxage 30
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    create 0640 www-data www-data
+}

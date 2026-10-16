@@ -1,5 +1,8 @@
 /config.php
 /data/*.sqlite
 /data/*.sqlite-*
+/data/.setup_token
+/data/backups/
+/data/mail.log*
 *.log
 .DS_Store

@@ -1,4 +1,5 @@
--- fragmichnicht — SQLite schema
+-- What2Bring — SQLite schema (idempotent; run on every connect).
+-- Column changes for existing databases live in inc/db.php (db_migrate()).
 -- E-mail plaintext lives ONLY in contribution_contacts; public repositories never join it.
 PRAGMA foreign_keys = ON;
 
@@ -31,7 +32,8 @@ CREATE TABLE IF NOT EXISTS contributions (
   email_hash TEXT NOT NULL,                  -- HMAC(app_pepper, lower(trim(email)))
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT,
-  UNIQUE (poll_id, email_hash)               -- upsert key
+  edit_token_hash TEXT,                      -- sha256 of the participant's personal edit token
+  UNIQUE (poll_id, email_hash)               -- one entry per e-mail address and poll
 );
 CREATE INDEX IF NOT EXISTS idx_contrib_poll ON contributions(poll_id);
 
@@ -56,3 +58,14 @@ CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL DEFAULT ''
 );
+
+-- Persistent throttling counters (login failures, public submissions).
+-- key_hash = HMAC(app_pepper, key); no plain IP addresses are stored.
+CREATE TABLE IF NOT EXISTS rate_events (
+  id       INTEGER PRIMARY KEY AUTOINCREMENT,
+  bucket   TEXT NOT NULL,
+  key_hash TEXT NOT NULL,
+  ts       INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_rate_lookup ON rate_events(bucket, key_hash, ts);
+CREATE INDEX IF NOT EXISTS idx_rate_ts ON rate_events(ts);
