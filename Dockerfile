@@ -1,6 +1,6 @@
 # What2Bring — production image: Apache + PHP, runs as www-data on port 8080,
 # compatible with a read-only root filesystem. State lives in the /data volume.
-FROM php:8.3-apache
+FROM php:8.5-apache
 
 # Apache: non-root friendly (port 8080, runtime dirs under /tmp), docroot = public/,
 # no server signature, no directory listings.
