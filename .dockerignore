@@ -1,6 +1,19 @@
+# Keep the image small and free of secrets / local state.
 .git
+.github
 .gitignore
+.dockerignore
+.editorconfig
+docs
+tests
+config.php
 data/*.sqlite
 data/*.sqlite-*
 data/mail.log
+data/.setup_token
+data/backups
 *.log
+*.md
+!README.md
+Dockerfile
+docker-compose.yml
