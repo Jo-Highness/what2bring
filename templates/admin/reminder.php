@@ -22,24 +22,24 @@
     <?php endif; ?>
 </div>
 
-<form method="post" action="<?= e(url('admin.reminder_send', ['id' => $poll['id']])) ?>">
+<form method="post" action="<?= e(url('admin.reminder_send', ['id' => $poll['id']])) ?>"
+      data-confirm="<?= e(t('rem.send_confirm', ['n' => count($recipients)])) ?>">
     <?= csrf_field() ?>
     <div class="card stack">
         <div class="field">
             <label for="subject"><?= e(t('rem.subject')) ?></label>
-            <input type="text" id="subject" name="subject" value="<?= e($defaultSubject) ?>" required>
+            <input type="text" id="subject" name="subject" value="<?= e($defaultSubject) ?>" maxlength="<?= LIMIT_SUBJECT ?>" required>
         </div>
         <div class="field">
             <label for="body"><?= e(t('rem.message')) ?></label>
-            <textarea id="body" name="body" style="min-height:280px;" required><?= e($defaultBody) ?></textarea>
+            <textarea id="body" name="body" style="min-height:280px;" maxlength="<?= LIMIT_MAIL_BODY ?>" required><?= e($defaultBody) ?></textarea>
             <p class="hint">
                 <?= e(t('rem.placeholders')) ?>
                 <code>{name}</code>, <code>{ueberschrift}</code>, <code>{datum}</code>, <code>{was_ich_mitbringe}</code>
             </p>
         </div>
         <div class="btn-row">
-            <button type="submit" class="btn btn--lg" <?= $recipients ? '' : 'disabled' ?>
-                    onclick="return confirm('<?= e(t('rem.send_confirm', ['n' => count($recipients)])) ?>');">
+            <button type="submit" class="btn btn--lg" <?= $recipients ? '' : 'disabled' ?>>
                 ✉ <?= e(t('rem.send')) ?>
             </button>
         </div>

@@ -38,11 +38,11 @@ $visKeys = ['who_and_what', 'names_only', 'none'];
     <div class="card stack">
         <div class="field">
             <label for="title"><?= e(t('form.title_label')) ?> *</label>
-            <input type="text" id="title" name="title" value="<?= e($vTitle) ?>" placeholder="<?= e(t('form.title_ph')) ?>" required>
+            <input type="text" id="title" name="title" value="<?= e($vTitle) ?>" placeholder="<?= e(t('form.title_ph')) ?>" maxlength="<?= LIMIT_TITLE ?>" required>
         </div>
         <div class="field">
             <label for="description"><?= e(t('form.desc_label')) ?></label>
-            <textarea id="description" name="description" placeholder="<?= e(t('form.desc_ph')) ?>"><?= e($vDesc) ?></textarea>
+            <textarea id="description" name="description" maxlength="<?= LIMIT_DESCRIPTION ?>" placeholder="<?= e(t('form.desc_ph')) ?>"><?= e($vDesc) ?></textarea>
             <p class="hint"><?= e(t('form.desc_hint')) ?></p>
         </div>
         <div class="field">
@@ -67,7 +67,7 @@ $visKeys = ['who_and_what', 'names_only', 'none'];
             <?php foreach ($rows as $row): ?>
                 <div class="item-row">
                     <input type="hidden" name="item_id[]" value="<?= e((string) $row['id']) ?>">
-                    <input type="text" name="item_label[]" value="<?= e($row['label']) ?>" placeholder="<?= e(t('form.thing_ph')) ?>">
+                    <input type="text" name="item_label[]" value="<?= e($row['label']) ?>" maxlength="<?= LIMIT_ITEM_LABEL ?>" placeholder="<?= e(t('form.thing_ph')) ?>" aria-label="<?= e(t('form.thing_label')) ?>">
                     <button type="button" class="btn btn--muted remove" aria-label="<?= e(t('form.remove')) ?>">✕</button>
                 </div>
             <?php endforeach; ?>
@@ -97,29 +97,7 @@ $visKeys = ['who_and_what', 'names_only', 'none'];
 <template id="rowTpl">
     <div class="item-row">
         <input type="hidden" name="item_id[]" value="">
-        <input type="text" name="item_label[]" value="" placeholder="<?= e(t('form.thing_ph')) ?>">
+        <input type="text" name="item_label[]" value="" maxlength="<?= LIMIT_ITEM_LABEL ?>" placeholder="<?= e(t('form.thing_ph')) ?>" aria-label="<?= e(t('form.thing_label')) ?>">
         <button type="button" class="btn btn--muted remove" aria-label="<?= e(t('form.remove')) ?>">✕</button>
     </div>
 </template>
-
-<script>
-(function () {
-    var rows = document.getElementById('itemRows');
-    var tpl = document.getElementById('rowTpl');
-    document.getElementById('addItem').addEventListener('click', function () {
-        rows.appendChild(tpl.content.cloneNode(true));
-        rows.lastElementChild.querySelector('input[type=text]').focus();
-    });
-    rows.addEventListener('click', function (e) {
-        if (e.target.classList.contains('remove')) {
-            if (rows.querySelectorAll('.item-row').length > 1) {
-                e.target.closest('.item-row').remove();
-            } else {
-                var t = e.target.closest('.item-row').querySelector('input[type=text]');
-                t.value = '';
-                t.focus();
-            }
-        }
-    });
-})();
-</script>

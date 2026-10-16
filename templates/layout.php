@@ -7,7 +7,8 @@
     <meta name="robots" content="noindex, nofollow">
     <title><?= e($title) ?> · What2Bring</title>
     <link rel="icon" href="data:image/svg+xml,<?= rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🧺</text></svg>') ?>">
-    <link rel="stylesheet" href="<?= e(base_url()) ?>/assets/style.css">
+    <link rel="stylesheet" href="<?= e(base_url()) ?>/assets/style.css?v=<?= e(W2B_VERSION) ?>">
+    <script src="<?= e(base_url()) ?>/assets/app.js?v=<?= e(W2B_VERSION) ?>" defer></script>
 </head>
 <body class="<?= ($public ?? false) ? 'is-public' : 'is-admin' ?>">
 <header class="topbar">
